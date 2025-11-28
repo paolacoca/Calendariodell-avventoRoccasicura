@@ -4,21 +4,28 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Calendario dell’Avvento – Comune di Roccasicura</title>
+
+    <!-- FONT -->
+    <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <!-- CSS -->
     <link rel="stylesheet" href="css/style.css">
 </head>
 
 <body class="home">
 
-    <div class="home-container">
-        <h1 class="titolo-home">🎄 Calendario dell’Avvento 🎄</h1>
+    <div class="overlay">
+        <!-- COVER: percorso corretto su GitHub -->
+        <img src="immagini/copertina/cover.png" alt="Calendario Home" class="cover-img">
 
-        <img src="immagini/copertina/cover.png" class="img-copertina" alt="Copertina Calendario">
-
-        <button class="btn-home" onclick="entra()">ENTRA</button>
-
-        <button class="btn-cambia" onclick="cambiaNome()">✏️ Cambia nome</button>
+        <!-- BOTTONE ENTRARE: classe originale -->
+        <a href="calendario.html" class="btn-enter">ENTRARE</a>
     </div>
 
+    <!-- CAMBIA NOME (opzionale) -->
+    <button class="btn-name" onclick="cambiaNome()">✏️ Cambia nome</button>
+
+    <!-- JAVASCRIPT -->
     <script src="js/script.js"></script>
 </body>
 </html>
