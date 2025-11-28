@@ -6,17 +6,15 @@ body.home {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 100vh;   /* Fix smartphone */
-  height: auto;        /* Fix smartphone */
+  min-height: 100vh;
+  height: auto;
   overflow-x: hidden;
   overflow-y: auto;
   font-family: 'Ubuntu', sans-serif;
   position: relative;
-  padding-top: 20px;   /* Aggiunge respiro su mobile */
+  padding-top: 20px;
   padding-bottom: 40px;
 }
-
-
 
 /* Contenitore immagine + bottone */
 .overlay {
@@ -42,7 +40,7 @@ body.home {
   filter: brightness(0.95);
   transition: transform 0.4s ease;
   z-index: 0;
-  pointer-events: none; /* evita blocco del bottone su mobile */
+  pointer-events: none;
 }
 
 /* Bottone ENTRARE */
@@ -92,7 +90,7 @@ body.home {
   transform: scale(1.05);
 }
 
-/* === RESPONSIVE PER TABLET E SMARTPHONE === */
+/* === RESPONSIVE PER TABLET === */
 @media (max-width: 1024px) {
   .cover-img {
     width: 80%;
@@ -107,47 +105,47 @@ body.home {
 
 /* === RESPONSIVE PER SMARTPHONE === */
 @media (max-width: 768px) {
-  .cover-img {
-    width: 95%;
-    max-width: 420px;
+
+  body.home {
+    padding-top: 10px;
   }
 
-  .overlay {
-    margin-top: 10px;
-  }
-}
-
-
+  /* Cover più piccola */
   .cover-img {
     width: 92%;
     max-width: 480px;
-    margin-bottom: 20px;
+    margin-bottom: 15px;
   }
 
+  /* Spostiamo il bottone ENTRARE SOPRA la cover */
   .btn-enter {
-    font-size: 1.05em;
+    order: -1;
+    margin-bottom: 20px;
+    margin-top: 0;
+    font-size: 1.1em;
     padding: 12px 32px;
   }
 
+  /* Spostiamo CAMBIA NOME in basso al centro */
   .btn-name {
-    bottom: 15px;
-    right: 15px;
-    padding: 8px 18px;
-    font-size: 0.9em;
+    position: fixed;
+    bottom: 20px;
+    right: 50%;
+    transform: translateX(50%);
+    padding: 10px 22px;
+    font-size: 1em;
+    z-index: 9999;
   }
 }
 
-/* === RESPONSIVE EXTRA SMALL (telefoni molto piccoli) === */
+/* === RESPONSIVE EXTRA SMALL === */
 @media (max-width: 480px) {
   .cover-img {
     width: 95%;
   }
 
   .btn-enter {
-    font-size: 0.95em;
+    font-size: 1em;
     padding: 10px 26px;
   }
 }
-
-
-
