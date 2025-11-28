@@ -1,4 +1,16 @@
-/* === HOME PRINCIPALE (home.html) === */
+/* =====================================================
+   ✨ STILE GENERALE
+===================================================== */
+
+body {
+  margin: 0;
+  font-family: 'Ubuntu', sans-serif;
+}
+
+
+/* =====================================================
+   ✨ HOME PRINCIPALE (home.html)
+===================================================== */
 
 body.home {
   margin: 0;
@@ -10,13 +22,11 @@ body.home {
   height: auto;
   overflow-x: hidden;
   overflow-y: auto;
-  font-family: 'Ubuntu', sans-serif;
   position: relative;
   padding-top: 20px;
   padding-bottom: 40px;
 }
 
-/* Contenitore immagine + bottone */
 .overlay {
   position: relative;
   display: flex;
@@ -29,7 +39,6 @@ body.home {
   z-index: 1;
 }
 
-/* Immagine principale */
 .cover-img {
   width: 70%;
   max-width: 1100px;
@@ -39,11 +48,9 @@ body.home {
   margin: 0 auto;
   filter: brightness(0.95);
   transition: transform 0.4s ease;
-  z-index: 0;
   pointer-events: none;
 }
 
-/* Bottone ENTRARE */
 .btn-enter {
   margin-top: 25px;
   background-color: #f3e4e4;
@@ -66,7 +73,8 @@ body.home {
   transform: scale(1.08);
 }
 
-/* Bottone CAMBIA NOME */
+
+/* BOTTONE CAMBIA NOME */
 .btn-name {
   position: absolute;
   bottom: 25px;
@@ -77,56 +85,31 @@ body.home {
   border-radius: 20px;
   padding: 10px 22px;
   font-weight: bold;
-  font-family: 'Ubuntu', sans-serif;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-  z-index: 10;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
 }
 
 .btn-name:hover {
   background-color: #b71c1c;
   color: #fff;
-  transform: scale(1.05);
 }
 
-/* === RESPONSIVE PER TABLET === */
-@media (max-width: 1024px) {
-  .cover-img {
-    width: 80%;
-    max-width: 700px;
-  }
 
-  .btn-enter {
-    font-size: 1.2em;
-    padding: 12px 38px;
-  }
-}
-
-/* === RESPONSIVE PER SMARTPHONE === */
+/* HOME RESPONSIVE */
 @media (max-width: 768px) {
-
-  body.home {
-    padding-top: 10px;
-  }
-
-  /* Cover più piccola */
   .cover-img {
-    width: 92%;
-    max-width: 480px;
-    margin-bottom: 15px;
+    width: 95%;
+    max-width: 420px;
   }
 
-  /* Spostiamo il bottone ENTRARE SOPRA la cover */
   .btn-enter {
     order: -1;
     margin-bottom: 20px;
-    margin-top: 0;
-    font-size: 1.1em;
     padding: 12px 32px;
+    font-size: 1.1em;
   }
 
-  /* Spostiamo CAMBIA NOME in basso al centro */
   .btn-name {
     position: fixed;
     bottom: 20px;
@@ -138,59 +121,14 @@ body.home {
   }
 }
 
-/* === RESPONSIVE EXTRA SMALL === */
-@media (max-width: 480px) {
-  .cover-img {
-    width: 95%;
-  }
-
-  .btn-enter {
-    font-size: 1em;
-    padding: 10px 26px;
-  }
-}
 
 
-/* --- BOTTONI IN BASSO --- */
-.bottom-buttons {
-  text-align: center;
-  margin-top: 30px;
-  margin-bottom: 50px;
-}
-
-.btn-home-return,
-.btn-change-name {
-  display: block;
-  margin: 10px auto;
-  background: #f3e4e4;
-  color: #000;
-  padding: 10px 25px;
-  border-radius: 25px;
-  text-decoration: none;
-  font-weight: bold;
-  font-size: 1em;
-  transition: 0.3s;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-  border: none;
-  cursor: pointer;
-}
-
-.btn-home-return:hover,
-.btn-change-name:hover {
-  background: #b71c1c;
-  color: white;
-}
-
-
-
-
-
-
-/* --- Calendario --- */
+/* =====================================================
+   ✨ CALENDARIO DELL'AVVENTO (calendario.html)
+===================================================== */
 
 body.calendar {
   background-color: #7b0412;
-  font-family: 'Ubuntu', sans-serif;
   color: white;
   text-align: center;
   padding-bottom: 60px;
@@ -208,6 +146,7 @@ body.calendar {
   display: block;
 }
 
+/* GRIGLIA 24 GIORNI */
 .calendar-grid {
   display: grid;
   gap: 15px;
@@ -216,20 +155,16 @@ body.calendar {
 }
 
 @media (max-width: 1024px) {
-  .calendar-grid {
-      grid-template-columns: repeat(4, 1fr);
-  }
+  .calendar-grid { grid-template-columns: repeat(4, 1fr); }
 }
 
 @media (max-width: 768px) {
-  .calendar-grid {
-      grid-template-columns: repeat(3, 1fr);
-  }
+  .calendar-grid { grid-template-columns: repeat(3, 1fr); }
 }
 
+/* CASELLE SENZA CORNICE */
 .day-box {
-  background-color: #fff2f2;
-  border: 4px solid #7b0412;
+  background-color: #ffffff;
   border-radius: 15px;
   padding: 10px;
   cursor: pointer;
@@ -246,13 +181,16 @@ body.calendar {
 }
 
 .day-number {
-  font-size: 1.5em;
+  font-size: 1.4em;
   font-weight: bold;
   color: #7b0412;
   margin-top: 5px;
+  display: block;
 }
 
-/* Bottone in basso */
+
+
+/* --- BOTTONE CAMBIA NOME IN BASSO --- */
 .bottom-buttons {
   margin-top: 30px;
 }
@@ -273,3 +211,110 @@ body.calendar {
   color: white;
 }
 
+
+
+/* =====================================================
+   ✨ POPUP CONTO ALLA ROVESCIA
+===================================================== */
+
+.popup {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+}
+
+.hidden { display: none; }
+
+.popup-content {
+  background: #fff;
+  padding: 25px;
+  border-radius: 20px;
+  text-align: center;
+  max-width: 350px;
+  color: #7b0412;
+}
+
+.popup-content h2 {
+  margin-bottom: 10px;
+}
+
+.countdown {
+  font-size: 1.6em;
+  font-weight: bold;
+  margin: 10px 0;
+}
+
+#close-popup {
+  margin-top: 15px;
+  background: #7b0412;
+  color: white;
+  padding: 10px 25px;
+  border: none;
+  border-radius: 12px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+
+
+/* =====================================================
+   ✨ PAGINA DEL SINGOLO GIORNO (1.html → 24.html)
+===================================================== */
+
+body.giorno {
+  background-color: #7b0412;
+  color: white;
+  text-align: center;
+  padding: 30px 10px;
+}
+
+.contenuto-giorno {
+  max-width: 800px;
+  margin: auto;
+  background-color: #fff2f2;
+  padding: 20px;
+  border-radius: 20px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+}
+
+.titolo-giorno {
+  font-size: 2em;
+  margin-bottom: 15px;
+  color: #7b0412;
+  font-weight: bold;
+}
+
+.img-giorno {
+  width: 100%;
+  max-width: 600px;
+  border-radius: 15px;
+  margin: 15px 0;
+}
+
+.testo-giorno {
+  font-size: 1.2em;
+  color: #7b0412;
+  margin-bottom: 20px;
+  line-height: 1.5;
+}
+
+.btn-return-calendar {
+  display: inline-block;
+  background: #f3e4e4;
+  color: #000;
+  padding: 10px 25px;
+  border-radius: 20px;
+  text-decoration: none;
+  font-weight: bold;
+  transition: 0.3s;
+}
+
+.btn-return-calendar:hover {
+  background: #b71c1c;
+  color: white;
+}
