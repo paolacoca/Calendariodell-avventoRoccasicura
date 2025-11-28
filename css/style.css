@@ -6,11 +6,16 @@ body.home {
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 100vh;
+  min-height: 100vh;   /* Fix smartphone */
+  height: auto;        /* Fix smartphone */
   overflow-x: hidden;
+  overflow-y: auto;
   font-family: 'Ubuntu', sans-serif;
   position: relative;
+  padding-top: 20px;   /* Aggiunge respiro su mobile */
+  padding-bottom: 40px;
 }
+
 
 
 /* Contenitore immagine + bottone */
@@ -143,4 +148,5 @@ body.home {
     padding: 10px 26px;
   }
 }
+
 
