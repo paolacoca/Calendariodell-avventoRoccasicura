@@ -23,3 +23,23 @@ function cambiaNome() {
         alert("Nome aggiornato!");
     }
 }
+
+// GENERA AUTOMATICAMENTE LE 24 CASELLE
+const grid = document.getElementById("calendar-grid");
+
+for (let i = 1; i <= 24; i++) {
+    const box = document.createElement("div");
+    box.className = "day-box";
+
+    box.innerHTML = `
+        <img src="immagini/giorni/${i}.png" class="day-img" alt="Giorno ${i}">
+        <span class="day-number">${i}</span>
+    `;
+
+    // Clic su un giorno → apri pagina dedicata
+    box.addEventListener("click", () => {
+        window.location.href = `giornate/${i}.html`;
+    });
+
+    grid.appendChild(box);
+}
