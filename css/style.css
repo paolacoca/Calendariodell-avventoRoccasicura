@@ -140,28 +140,39 @@ body.calendar {
 }
 
 /* Caselle dei giorni */
+/* CASELLE - finestra 4:5 con cornice sottile */
 .day-box {
-  background: #ffffff;
-  border-radius: 15px;
-  padding: 10px;
+  aspect-ratio: 4 / 5;
+  background: none;
+  padding: 0;
   cursor: pointer;
-  transition: .2s;
+  position: relative;
+  transition: transform .2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .day-box:hover {
   transform: scale(1.05);
 }
 
+/* Cornice 1 cm (~10px) elegante */
 .day-img {
   width: 100%;
-  border-radius: 10px;
+  height: 100%;
+  object-fit: cover;
+  border: 10px solid #f3e4e4; /* colore elegante chiaro */
+  border-radius: 12px;
 }
 
+/* Numero sotto */
 .day-number {
-  font-size: 1.4em;
+  font-size: 1.5em;
   font-weight: bold;
-  color: #7b0412;
-  margin-top: 6px;
+  color: #f3e4e4;
+  margin-top: 8px;
+  display: block;
 }
 
 
@@ -296,3 +307,4 @@ body.giorno {
   background: #b71c1c;
   color: white;
 }
+
