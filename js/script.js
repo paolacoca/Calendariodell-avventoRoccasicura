@@ -41,48 +41,45 @@ function cambiaNome() {
 
 
 /* ============================================================
-   📅 GENERA LE CASELLE DEL CALENDARIO (1–24) + CASELLA 25 SPECIALE
+   📅 GENERA CASELLE 1-24 + POSIZIONAMENTO SPECIALE DEL 25
 ============================================================ */
 
 const grid = document.getElementById("calendar-grid");
 
 function dataApertura(giorno) {
-    // Giorno 25 lo facciamo aprire solo il 25
-    if (giorno == 25) {
-        return new Date(`2025-12-25T00:00:00`);
-    }
-    return new Date(`2025-12-${String(giorno).padStart(2, '0')}T00:00:00`);
+    return new Date(`2025-12-${String(giorno).padStart(2, "0")}T00:00:00`);
 }
 
-// 🔹 Prima inseriamo 1 → 24
+/* ---- CREA I GIORNI 1 → 24 IN ORDINE NORMALE ---- */
 for (let i = 1; i <= 24; i++) {
     const box = document.createElement("div");
-    box.className = "day-box";
+    box.classList.add("day-box");
 
     box.innerHTML = `
-        <img src="immagini/giorni/${i}.png" alt="Giorno ${i}" class="day-image">
+        <img src="immagini/giorni/${i}.png" class="day-image" alt="Giorno ${i}">
     `;
 
     box.addEventListener("click", () => gestisciClick(i));
     grid.appendChild(box);
 }
 
-// 🔹 Ora inseriamo la CASELLA 25 (sotto la 23)
+/* ---- CREA IL GIORNO 25 E LO METTE IN RIGA 8 - COLONNA 2 ---- */
 const box25 = document.createElement("div");
-box25.className = "day-box day-special";
+box25.classList.add("day-box", "day-special");
 
 box25.innerHTML = `
-    <img src="immagini/giorni/25.png" alt="Giorno 25" class="day-image">
+    <img src="immagini/giorni/25.png" class="day-image" alt="Giorno 25">
 `;
 
+box25.style.gridColumn = "2";   // colonna centrale
+box25.style.gridRow = "8";      // dopo le prime 7 righe
 box25.addEventListener("click", () => gestisciClick(25));
 
-// -> posizione sotto la 23 = dopo la casella 23 = index 23 (0-based)
-grid.insertBefore(box25, grid.children[24]);
+grid.appendChild(box25);
 
 
 /* ============================================================
-   ⏳ GESTIONE CLICK + POPUP CONTO ALLA ROVESCIA
+   ⏳ CLICK + POPUP CONTO ALLA ROVESCIA
 ============================================================ */
 
 const popup = document.getElementById("popup");
@@ -92,20 +89,15 @@ const countdownEl = document.getElementById("countdown");
 let timerInterval;
 
 function gestisciClick(giorno) {
-    const adesso = new Date();
+    const oggi = new Date();
     const apertura = dataApertura(giorno);
 
-    // Se il giorno è disponibile → apri pagina
-    if (adesso >= apertura) {
-        const pagina = giorno === 25 ? "speciale.html" : `${giorno}.html`;
-        window.location.href = `giornate/${pagina}`;
-        return;
+    if (oggi >= apertura) {
+        window.location.href = `giornate/${giorno}.html`;
+    } else {
+        mostraPopup(apertura);
     }
-
-    // Mostra popup
-    mostraPopup(apertura);
 }
-
 
 function mostraPopup(apertura) {
     popup.classList.remove("hidden");
@@ -122,18 +114,16 @@ function mostraPopup(apertura) {
             return;
         }
 
-        const giorni = Math.floor(diff / (1000 * 60 * 60 * 24));
-        const ore = Math.floor((diff / (1000 * 60 * 60)) % 24);
-        const minuti = Math.floor((diff / (1000 * 60)) % 60);
-        const secondi = Math.floor((diff / 1000) % 60);
+        let giorni = Math.floor(diff / (1000 * 60 * 60 * 24));
+        let ore = Math.floor((diff / (1000 * 60 * 60)) % 24);
+        let minuti = Math.floor((diff / (1000 * 60)) % 60);
+        let secondi = Math.floor((diff / 1000) % 60);
 
         countdownEl.textContent =
             `${giorni} g : ${ore} h : ${minuti} m : ${secondi} s`;
     }, 1000);
 }
 
-
-// 🔘 chiudi popup
 closeBtn.addEventListener("click", () => {
     popup.classList.add("hidden");
     clearInterval(timerInterval);
