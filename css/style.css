@@ -108,54 +108,56 @@ body.home {
 /* =====================================================================
    📱 VERSIONE MOBILE (max 768px)
 ===================================================================== */
-
-
 @media (max-width: 768px) {
 
+  /* Centra tutto verticalmente */
   body.home {
-    padding-top: 40px;
-    padding-bottom: 120px; /* ➜ aggiunge spazio sotto l’immagine */
+    display: flex;
+    flex-direction: column;
+    justify-content: center; 
+    align-items: center;
+    min-height: 100vh;
+    padding: 0;
   }
 
+  /* ORDINE INVERTITO: immagine sotto il bottone */
   .overlay {
-    margin-top: 20px;
+    width: 100%;
+    display: flex;
+    flex-direction: column-reverse; 
+    align-items: center;
+    justify-content: center;
+    gap: 25px; /* spazio tra bottone e immagine */
+    margin: 0;
+    padding: 0;
   }
 
+  /* IMMAGINE CENTRALE SOTTO */
   .cover-img {
-    width: 95%;
-    margin-top: 40px;     /* ➜ spinge l’immagine un po’ più giù */
-    margin-bottom: 40px;
+    width: 88%;
+    max-width: 460px;
+    margin: 0;
   }
 
+  /* BOTTONE ENTRARE SOPRA L’IMMAGINE */
   .btn-enter {
     position: relative;
     bottom: auto;
     left: auto;
     transform: none;
-    margin-top: 15px;
-  }
-}
-
-  /* ENTRARE ora NON è fisso in basso,
-     ma diventa un normale bottone sopra l'immagine */
-  .btn-enter {
-    position: relative;
-    bottom: auto;
-    left: auto;
-    transform: none;
-    font-size: 1.1em;
-    padding: 12px 30px;
-    margin-bottom: 0;
+    font-size: 1.2em;
+    padding: 14px 34px;
+    margin: 0;
   }
 
-  /* Cambia nome resta fisso in basso sinistra */
+  /* BOTTONE CAMBIA NOME — fisso in basso a sinistra */
   .btn-name {
+    position: fixed;
     bottom: 20px;
     left: 20px;
     padding: 10px 20px;
   }
 }
-
 
 
 /* =====================================================================
@@ -420,6 +422,7 @@ body.giorno {
   background: #b71c1c;
   color: white;
 }
+
 
 
 
