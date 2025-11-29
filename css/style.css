@@ -11,8 +11,6 @@ body {
   font-family: 'Ubuntu', sans-serif;
 }
 
-
-
 /* =====================================================================
    🎅 HOME PRINCIPALE (home.html)
 ===================================================================== */
@@ -25,24 +23,34 @@ body.home {
   justify-content: flex-start;
   min-height: 100vh;
   overflow-x: hidden;
-  padding: 20px 0 60px 0;
+  position: relative;
+  padding-top: 20px;
 }
 
+/* Contenitore immagine */
 .overlay {
   text-align: center;
   width: 100%;
+  margin-top: 20px;
 }
 
 .cover-img {
   width: 70%;
   max-width: 1100px;
-  margin: 0 auto 20px auto;
   filter: brightness(0.95);
   pointer-events: none;
   transition: transform .3s;
 }
 
+/* ============================================================
+   BOTTONE ENTRARE (BASSO CENTRALE)
+============================================================ */
+.btn-enter-home,
 .btn-enter {
+  position: fixed;
+  bottom: 25px;
+  left: 50%;
+  transform: translateX(-50%);
   background-color: #f3e4e4;
   color: #000;
   padding: 14px 42px;
@@ -52,19 +60,24 @@ body.home {
   text-decoration: none;
   box-shadow: 0 4px 15px rgba(0,0,0,0.4);
   transition: .3s;
-  display: inline-block;
+  z-index: 9998;
 }
 
+.btn-enter-home:hover,
 .btn-enter:hover {
   background-color: #b71c1c;
   color: #fff;
-  transform: scale(1.07);
+  transform: translateX(-50%) scale(1.07);
 }
 
+/* ============================================================
+   BOTTONE CAMBIA NOME (BASSO SINISTRA)
+============================================================ */
+.btn-name-home,
 .btn-name {
   position: fixed;
   bottom: 25px;
-  right: 25px;
+  left: 25px;
   padding: 10px 22px;
   border: none;
   border-radius: 20px;
@@ -76,12 +89,13 @@ body.home {
   z-index: 9999;
 }
 
+.btn-name-home:hover,
 .btn-name:hover {
   background: #b71c1c;
   color: white;
 }
 
-/* MOBILE HOME */
+/* MOBILE */
 @media (max-width: 768px) {
 
   .cover-img {
@@ -89,16 +103,18 @@ body.home {
     max-width: 420px;
   }
 
+  .btn-enter-home,
   .btn-enter {
-    margin-bottom: 15px;
     font-size: 1.1em;
     padding: 12px 30px;
+    bottom: 20px;
   }
 
+  .btn-name-home,
   .btn-name {
-    right: 50%;
-    transform: translateX(50%);
-    padding: 10px 22px;
+    padding: 10px 20px;
+    bottom: 20px;
+    left: 20px;
   }
 }
 
@@ -363,6 +379,7 @@ body.giorno {
   background: #b71c1c;
   color: white;
 }
+
 
 
 
