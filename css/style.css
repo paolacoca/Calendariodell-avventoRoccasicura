@@ -226,138 +226,151 @@ body.home {
    🎁 CALENDARIO (calendario.html)
    Versione finale: clean, elegante, identica allo screenshot
 ===================================================================== */
-
+/* === CALENDARIO === */
 body.calendar {
+  margin: 0;
   background-color: #7b0412;
-  color: white;
-  text-align: center;
-  padding-bottom: 70px;
   font-family: 'Ubuntu', sans-serif;
-}
-
-/* SCRITTA DI BENVENUTO */
-#benvenuto {
-  margin-top: 25px;
-  font-size: 2em;
-  font-weight: 700;
   color: #fff;
-  text-shadow: 0 0 8px rgba(0,0,0,0.4);
+  overflow-x: hidden;
 }
 
-/* IMMAGINE SUPERIORE */
+/* Immagine superiore */
+.top-image {
+  text-align: center;
+  background-color: #7b0412;
+}
+
 .home-top-img {
+  width: 100%;
+  max-width: 1600px;
+  height: auto;
   display: block;
-  width: 95%;
-  max-width: 1100px;
-  margin: 25px auto 35px auto;
-  filter: brightness(0.98);
-  border-radius: 18px;
-  box-shadow: 0 4px 18px rgba(0,0,0,0.4);
+  margin: 0 auto;
+  object-fit: contain;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.5);
+  border-radius: 8px;
 }
 
-
-/* =====================================================================
-   🎄 GRIGLIA 3×8 — riquadri bianchi come screenshot
-===================================================================== */
+/* Griglia principale */
+.calendar-section {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px 20px 100px;
+}
 
 .calendar-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 25px;
-  width: 95%;
-  max-width: 1000px;
-  margin: auto;
+  grid-template-columns: repeat(3, minmax(180px, 1fr));
+  gap: 20px;
+  justify-items: center;
 }
 
-/* BOX GIORNI */
+/* Casella giorno */
 .day-box {
-  background: #ffffff;
-  border-radius: 16px;
-  padding: 12px;
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  border-radius: 10px;
+  background-color: rgba(255,255,255,0.1);
+  border: 2px solid #7b0412;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+  text-align: center;
   cursor: pointer;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.35);
-  transition: transform .25s;
+  transition: transform 0.3s ease;
 }
+
+/* CASSELLA 25 — posizionata sotto la 23, colonna centrale */
+.day-box.g25 {
+  grid-column: 2;
+  grid-row: 9;
+  transform: scale(1.15);
+  border: 3px solid #ffd700;
+  box-shadow: 0 0 20px rgba(255, 215, 0, 0.6);
+}
+
 
 .day-box:hover {
-  transform: scale(1.04);
-}
-
-/* IMMAGINI INTERNE (quelle con la cornice disegnata) */
-.day-img {
-  width: 100%;
-  height: auto;
-  border-radius: 12px;
-  object-fit: cover;
-
-  /* niente padding, niente bordi extra */
-  border: none !important;
-  background: none !important;
-}
-
-/* NUMERO NASCOSTO */
-.day-number {
-  display: none !important;
-}
-
-
-/* =====================================================================
-   ⭐ CASELLA 25 – CENTRATA NELLA SUA RIGA
-===================================================================== */
-
-.special-25 {
-  background: #ffffff;
-  border-radius: 16px;
-  padding: 12px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.35);
-  cursor: pointer;
-  transition: transform .25s;
-
-  grid-column: 2 / 3;   /* CENTRA IL GIORNO 25 */
-}
-
-.special-25:hover {
   transform: scale(1.05);
+  background-color: rgba(255,255,255,0.2);
 }
 
-.special-25 .day-img {
+/* Immagine */
+.day-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 10px;
+}
+
+/* Giorno 25 – centrato e speciale */
+.day-special {
+  border: 3px solid #ffd700;
+  transform: scale(1.15);
+  box-shadow: 0 0 20px rgba(255, 215, 0, 0.6);
+  justify-self: center;
+}
+
+
+/* Popup */
+.popup {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,0,0,0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.popup.hidden {
+  display: none;
+}
+
+.popup-content {
+  background-color: #fff;
+  color: #000;
+  padding: 30px 40px;
   border-radius: 12px;
+  text-align: center;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.4);
+  max-width: 320px;
 }
 
+.popup-content p {
+  font-size: 1.2em;
+  margin-bottom: 20px;
+}
 
-/* =====================================================================
-   📱 VERSIONE MOBILE PERFETTA
-===================================================================== */
+#close-popup {
+  background-color: #7b0412;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: 0.3s ease;
+}
 
-@media (max-width: 768px) {
+#close-popup:hover {
+  background-color: #b71c1c;
+}
 
-  #benvenuto {
-    font-size: 1.6em;
-  }
-
-  .home-top-img {
-    width: 100%;
-    max-width: 550px;
-    margin: 20px auto 30px auto;
-  }
-
+/* Mobile */
+@media (max-width: 450px) {
   .calendar-grid {
-    gap: 20px;
+    grid-template-columns: repeat(1, 1fr);
+    gap: 16px;
   }
 
   .day-box {
-    padding: 10px;
-  }
-
-  .special-25 {
-    grid-column: 1 / 4;   /* su mobile la centri tutta */
-    max-width: 70%;
-    margin: 0 auto;
+    width: 90%;
+    max-width: 320px;
   }
 }
-
-
-
-
 
 
