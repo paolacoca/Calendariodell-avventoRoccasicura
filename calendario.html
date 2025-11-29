@@ -13,6 +13,7 @@
 
 <body class="calendar">
 
+  <!-- Benvenuto -->
   <p id="benvenuto" class="benvenuto"></p>
 
   <script>
@@ -20,15 +21,22 @@
     document.getElementById("benvenuto").textContent = `🎅 Ciao! Ho Ho Oh, ${nome}!`;
   </script>
 
+  <!-- Immagine sopra la griglia -->
   <section class="top-image">
     <img src="immagini/copertina/cover1.png" class="home-top-img">
   </section>
 
+  <!-- Griglia -->
   <section class="calendar-section">
     <div class="calendar-grid" id="calendar-grid"></div>
+
+    <!-- Casella 25 POSIZIONATA SOTTO RIGA 8 COLONNA 2 -->
+    <div class="special-25" onclick="gestisciClick(25)">
+      <span class="day-number">25</span>
+    </div>
   </section>
 
-  <!-- Popup -->
+  <!-- Popup blocco giorni -->
   <div id="popup" class="popup hidden">
     <div class="popup-content">
       <h2>⏳ Non ancora disponibile</h2>
@@ -39,9 +47,8 @@
     </div>
   </div>
 
-  <section class="bottom-buttons">
-    <button onclick="cambiaNome()" class="btn-change-name">✏️ Cambia nome</button>
-  </section>
+  <!-- Bottone cambia nome -->
+  <button onclick="cambiaNome()" class="btn-name">✏️ Cambia nome</button>
 
   <script>
     function cambiaNome() {
@@ -55,6 +62,8 @@
 
 </body>
 </html>
+
+
 
 
 
