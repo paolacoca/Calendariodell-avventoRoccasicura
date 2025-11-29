@@ -11,20 +11,6 @@ body {
   font-family: 'Ubuntu', sans-serif;
 }
 /* =====================================================================
-   🎄 STILE GENERALE
-===================================================================== */
-* {
-  box-sizing: border-box;
-}
-
-body {
-  margin: 0;
-  font-family: 'Ubuntu', sans-serif;
-}
-
-
-
-/* =====================================================================
    🎅 HOME PRINCIPALE (index.html)
 ===================================================================== */
 
@@ -37,36 +23,38 @@ body.home {
   min-height: 100vh;
   overflow-x: hidden;
   position: relative;
-  padding-top: 20px;
+  padding: 30px 0 100px 0; /* Spazio per i bottoni */
 }
 
-/* Contenitore immagine */
+/* CONTENITORE DELLA COPERTINA */
 .overlay {
   text-align: center;
   width: 100%;
-  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
-/* Immagine centrale grande */
+/* IMMAGINE CENTRALE */
 .cover-img {
   width: 80%;
-  max-width: 1100px;
+  max-width: 1000px;
+  margin-top: 40px;       /* distanza dalla cima */
+  margin-bottom: 40px;    /* distanza dal bottone ENTRARE */
   filter: brightness(0.96);
   pointer-events: none;
-  transition: transform 0.3s ease;
+  transition: transform .3s ease;
 }
 
 
 
 /* =====================================================================
-   🔘 BOTTONE ENTRARE (BASSO CENTRALE)
+   🔘 BOTTONE ENTRARE
+   - Su PC → in basso centrato
+   - Su telefono → sopra l'immagine e centrato
 ===================================================================== */
 
 .btn-enter {
-  position: fixed;
-  bottom: 25px;
-  left: 50%;
-  transform: translateX(-50%);
   background-color: #ffffff;
   color: #000;
   padding: 14px 42px;
@@ -76,7 +64,11 @@ body.home {
   text-decoration: none;
   box-shadow: 0 4px 15px rgba(0,0,0,0.4);
   transition: 0.3s;
-  z-index: 9998;
+  z-index: 5;
+  position: fixed;
+  bottom: 25px;
+  left: 50%;
+  transform: translateX(-50%);
 }
 
 .btn-enter:hover {
@@ -114,26 +106,35 @@ body.home {
 
 
 /* =====================================================================
-   📱 VERSIONE MOBILE
+   📱 VERSIONE MOBILE (max 768px)
 ===================================================================== */
 
 @media (max-width: 768px) {
 
+  /* Immagine più grande e ben centrata */
   .cover-img {
-    width: 90%;
-    max-width: 500px;
+    width: 95%;
+    margin-top: 20px;
+    margin-bottom: 25px;
   }
 
+  /* ENTRARE ora NON è fisso in basso,
+     ma diventa un normale bottone sopra l'immagine */
   .btn-enter {
+    position: relative;
+    bottom: auto;
+    left: auto;
+    transform: none;
     font-size: 1.1em;
     padding: 12px 30px;
-    bottom: 20px;
+    margin-bottom: 0;
   }
 
+  /* Cambia nome resta fisso in basso sinistra */
   .btn-name {
-    padding: 10px 20px;
     bottom: 20px;
     left: 20px;
+    padding: 10px 20px;
   }
 }
 
@@ -168,10 +169,6 @@ body.home {
   box-shadow: 0 4px 20px rgba(0,0,0,0.4);
 }
 
-.popup-box h2 {
-  margin: 0 0 10px 0;
-}
-
 .popup-box input {
   width: 90%;
   padding: 10px;
@@ -179,7 +176,6 @@ body.home {
   margin-top: 10px;
   border-radius: 10px;
   border: 2px solid #7b0412;
-  outline: none;
 }
 
 .popup-box button {
@@ -196,6 +192,14 @@ body.home {
 .popup-box button:hover {
   background: #b71c1c;
 }
+
+
+
+
+
+
+
+
 
 
 /* =====================================================================
@@ -398,6 +402,7 @@ body.giorno {
   background: #b71c1c;
   color: white;
 }
+
 
 
 
