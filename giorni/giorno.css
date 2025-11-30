@@ -1,1 +1,45 @@
+body {
+    font-family: "Ubuntu", sans-serif;
+    background: #fafafa;
+    margin: 0;
+    padding: 30px;
+    text-align: center;
+}
+
+.container-giorno {
+    max-width: 700px;
+    margin: auto;
+    background: white;
+    padding: 25px;
+    border-radius: 15px;
+    box-shadow: 0 0 12px rgba(0,0,0,0.15);
+}
+
+h1 {
+    color: #8b0000;
+    margin-bottom: 20px;
+    font-size: 32px;
+}
+
+.img-giorno {
+    width: 90%;
+    max-width: 350px;
+    border-radius: 12px;
+    margin: 20px 0;
+    box-shadow: 0 0 10px rgba(0,0,0,0.25);
+}
+
+.testo-giorno {
+    font-size: 18px;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.contenuto-extra {
+    font-size: 17px;
+    padding: 15px;
+    background: #fff3f3;
+    border-radius: 12px;
+    border: 1px solid #ffcccc;
+}
 
