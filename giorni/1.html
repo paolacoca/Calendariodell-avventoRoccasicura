@@ -16,10 +16,7 @@
       text-align: center;
     }
 
-    h1 {
-      margin: 10px 0;
-      color: #ffd700;
-    }
+    h1 { margin: 10px 0; color: #ffd700; }
 
     .info {
       position: fixed;
@@ -46,10 +43,8 @@
     /* POPUP CLASSIFICA */
     #fine {
       position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
       background: rgba(0,0,0,0.65);
       backdrop-filter: blur(4px);
       z-index: 9999;
@@ -66,11 +61,11 @@
       max-width: 450px;
       border: 2px solid #ffd700;
       color: #400000;
-      animation: popup 0.4s ease-out;
+      animation: popup .4s ease-out;
     }
 
     @keyframes popup {
-      from { transform: scale(0.7); opacity: 0; }
+      from { transform: scale(.7); opacity: 0; }
       to { transform: scale(1); opacity: 1; }
     }
 
@@ -91,12 +86,12 @@
       margin-top: 20px;
       background-color: #7b0412;
       color: #fff;
-      text-decoration: none;
       padding: 12px 30px;
       border-radius: 30px;
       font-weight: bold;
-      transition: 0.3s;
       cursor: pointer;
+      text-decoration: none;
+      transition: .3s;
     }
 
     .btn-back:hover {
@@ -108,252 +103,242 @@
 
 <body>
 
-  <h1>🎅 Giorno 1 – Babbo Natale raccogli i regali!</h1>
+<h1>🎅 Giorno 1 – Babbo Natale raccogli i regali!</h1>
 
-  <canvas id="game"></canvas>
-  <div class="info" id="info">🎁 Punteggio: 0 | ⏱️ Tempo: 60s</div>
+<canvas id="game"></canvas>
+<div id="info" class="info">🎁 Punteggio: 0 | ⏱️ Tempo: 60s</div>
 
-  <!-- POPUP CLASSIFICA -->
-  <div id="fine">
-    <div class="classifica-box">
-      <h2 id="messaggio"></h2>
+<!-- POPUP -->
+<div id="fine">
+  <div class="classifica-box">
 
-      <h3>🏆 Classifica Completa</h3>
-      <table id="score-table">
-        <tr><th>Nome</th><th>Punti</th></tr>
-      </table>
+    <h2 id="messaggio"></h2>
 
-      <!-- Bottone RIPROVA -->
-      <button id="retry-btn" class="btn-back" style="background:#d41e1e; margin-bottom:15px;">
-        🔄 Riprova
-      </button>
+    <h3>🏆 Classifica Completa</h3>
+    <table id="score-table">
+      <tr><th>Nome</th><th>Punti</th></tr>
+    </table>
 
-      <!-- Torna al Calendario -->
-      <a href="../calendario.html" class="btn-back">
-        ⬅ Torna al Calendario
-      </a>
-    </div>
+    <button id="retry-btn" class="btn-back" style="background:#d41e1e">
+      🔄 Riprova
+    </button>
+
+    <a href="../calendario.html" class="btn-back">⬅ Torna al Calendario</a>
+
   </div>
+</div>
 
-  <script>
-    const nome = localStorage.getItem("utente") || "Ospite";
-    const canvas = document.getElementById("game");
-    const ctx = canvas.getContext("2d");
+<script>
+/* NOME MASCHERATO */
+const nomeReale = localStorage.getItem("utente") || "Ospite";
+const nomeMascherato = nomeReale[0] + Math.floor(Math.random()*900+100) + nomeReale.slice(1);
 
-    /* =============================
-       FUNZIONE: ANONIMIZZA NOME
-       es: Angela → A182ngela
-    ============================== */
-    function anonimizzaNome(nome) {
-      nome = nome.trim();
-      if (nome.length < 2) return nome;
+/* CANVAS CONFIG */
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
 
-      const prima = nome[0];
-      const resto = nome.slice(1);
+function resizeCanvas() {
+  if (window.innerWidth < 700) {
+    canvas.width = window.innerWidth - 20;
+    canvas.height = window.innerHeight * 0.6;
+  } else {
+    canvas.width = 900;
+    canvas.height = 500;
+  }
+}
+resizeCanvas();
+window.addEventListener("resize", resizeCanvas);
 
-      const n1 = Math.floor(Math.random() * 10);
-      const n2 = Math.floor(Math.random() * 10);
-      const n3 = Math.floor(Math.random() * 10);
+/* SANTA */
+const santa = {
+  x: 100,
+  y: canvas.height - 120,
+  w: 70,
+  h: 90,
+  vy: 0,
+  jumping: false,
+  speed: 10  // 🔥 velocità aumentata
+};
 
-      return `${prima}${n1}${n2}${n3}${resto}`;
+const santaImg = new Image();
+santaImg.src = "../img/babbo.png";
+
+/* OGGETTI */
+const giftImg = new Image();
+giftImg.src = "../img/gift.png";
+
+const bombImg = new Image();
+bombImg.src = "../img/bomba.png";
+
+let objects = [];
+const keys = {};
+
+/* MOVIMENTO PC */
+document.addEventListener("keydown", e => keys[e.key] = true);
+document.addEventListener("keyup", e => keys[e.key] = false);
+
+/* SALTO */
+function jump() {
+  if (!santa.jumping) {
+    santa.vy = -14; // salto più forte🔥
+    santa.jumping = true;
+  }
+}
+document.addEventListener("keypress", e => {
+  if (e.key === " " || e.key === "ArrowUp") jump();
+});
+
+/* MOUSE */
+canvas.addEventListener("mousedown", jump);
+canvas.addEventListener("mousemove", e => {
+  if (e.buttons > 0) {
+    const rect = canvas.getBoundingClientRect();
+    santa.x = e.clientX - rect.left - santa.w/2;
+  }
+});
+
+/* TOUCH SUPER VELOCE */
+canvas.addEventListener("touchstart", jump);
+canvas.addEventListener("touchmove", e => {
+  e.preventDefault();
+  const rect = canvas.getBoundingClientRect();
+  santa.x = e.touches[0].clientX - rect.left - santa.w/2;
+}, { passive:false });
+
+/* TIMER */
+let score = 0;
+let timeLeft = 60;
+
+function updateTimer() {
+  const interval = setInterval(() => {
+    timeLeft--;
+    if (timeLeft <= 0) {
+      clearInterval(interval);
+      endGame();
     }
+  }, 1000);
+}
 
-    /* ============================= */
+/* OGGETTI */
+function spawnObject() {
+  const isBomb = Math.random() < 0.25;
+  const obj = {
+    x: Math.random()*(canvas.width - 40),
+    y: canvas.height - 160 - Math.random()*100,
+    size: 40,
+    type: isBomb ? "bomb" : "gift",
+    fade: false
+  };
+  objects.push(obj);
 
-    /* RESPONSIVE CANVAS */
-    function resizeCanvas() {
-      if (window.innerWidth < 700) {
-        canvas.width = window.innerWidth - 20;
-        canvas.height = window.innerHeight * 0.6;
-      } else {
-        canvas.width = 900;
-        canvas.height = 500;
-      }
+  setTimeout(() => {
+    obj.fade = true;
+    setTimeout(() => objects = objects.filter(o => o !== obj), 400);
+  }, 2000);
+}
+setInterval(spawnObject, 1300);
+
+/* MOVIMENTO SANTA */
+function moveSanta() {
+  if (keys["ArrowLeft"]) santa.x -= santa.speed;
+  if (keys["ArrowRight"]) santa.x += santa.speed;
+
+  santa.y += santa.vy;
+  santa.vy += 0.6;
+
+  if (santa.y > canvas.height - 120) {
+    santa.y = canvas.height - 120;
+    santa.vy = 0;
+    santa.jumping = false;
+  }
+
+  if (santa.x < 0) santa.x = 0;
+  if (santa.x + santa.w > canvas.width) santa.x = canvas.width - santa.w;
+}
+
+/* COLLISIONI */
+function checkCollisions() {
+  objects.forEach(o => {
+    if (santa.x < o.x + o.size &&
+        santa.x + santa.w > o.x &&
+        santa.y < o.y + o.size &&
+        santa.y + santa.h > o.y) {
+
+      objects = objects.filter(x => x !== o);
+
+      if (o.type === "gift") score += 10;
+      else score -= 5;
     }
-    resizeCanvas();
-    window.addEventListener("resize", resizeCanvas);
+  });
+}
 
-    /* SANTA */
-    const santa = { x: 100, y: canvas.height - 120, w: 70, h: 90, vy: 0, jumping: false, speed: 6 };
-    const santaImg = new Image();
-    santaImg.src = "../img/babbo.png";
+/* DISEGNO */
+function draw() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.drawImage(santaImg, santa.x, santa.y, santa.w, santa.h);
 
-    /* OGGETTI */
-    const giftImg = new Image();
-    giftImg.src = "../img/gift.png";
+  objects.forEach(o => {
+    ctx.globalAlpha = o.fade ? 0.5 : 1;
+    ctx.drawImage(o.type === "gift" ? giftImg : bombImg, o.x, o.y, o.size, o.size);
+    ctx.globalAlpha = 1;
+  });
 
-    const bombImg = new Image();
-    bombImg.src = "../img/bomba.png";
+  document.getElementById("info").textContent =
+    `🎁 ${nomeMascherato} | Punti: ${score} | ⏱️ ${timeLeft}s`;
+}
 
-    let objects = [];
-    const keys = {};
+/* LOOP */
+function gameLoop() {
+  moveSanta();
+  checkCollisions();
+  draw();
 
-    document.addEventListener("keydown", e => keys[e.key] = true);
-    document.addEventListener("keyup", e => keys[e.key] = false);
+  if (timeLeft > 0) requestAnimationFrame(gameLoop);
+}
 
-    canvas.addEventListener("touchstart", jump);
-    canvas.addEventListener("mousedown", jump);
+/* FINE GIOCO */
+function endGame() {
+  canvas.style.display = "none";
+  document.getElementById("info").style.display = "none";
 
-    function jump() {
-      if (!santa.jumping) {
-        santa.vy = -12;
-        santa.jumping = true;
-      }
-    }
+  document.getElementById("fine").style.display = "flex";
+  document.getElementById("messaggio").textContent =
+    `🎉 Bravo ${nomeMascherato}! Hai totalizzato ${score} punti!`;
 
-    canvas.addEventListener("touchmove", e => {
-      e.preventDefault();
-      const rect = canvas.getBoundingClientRect();
-      santa.x = e.touches[0].clientX - rect.left - santa.w/2;
-    }, { passive: false });
+  salvaPunteggio(nomeMascherato, score);
+  mostraClassifica();
+}
 
-    /* TIMER */
-    let score = 0;
-    let timeLeft = 60;
+/* CLASSIFICA LOCALE (privata) */
+function salvaPunteggio(nome, punti) {
+  let arr = JSON.parse(localStorage.getItem("punteggi_giorno1")) || [];
+  arr.push({ nome, punti });
+  arr.sort((a,b)=>b.punti - a.punti);
+  localStorage.setItem("punteggi_giorno1", JSON.stringify(arr));
+}
 
-    function updateTimer() {
-      const interval = setInterval(() => {
-        timeLeft--;
-        if (timeLeft <= 0) {
-          clearInterval(interval);
-          endGame();
-        }
-      }, 1000);
-    }
+function mostraClassifica() {
+  const arr = JSON.parse(localStorage.getItem("punteggi_giorno1")) || [];
+  const table = document.getElementById("score-table");
+  table.innerHTML = "<tr><th>Nome</th><th>Punti</th></tr>";
 
-    /* OGGETTI CASUALI */
-    function spawnObject() {
-      const isBomb = Math.random() < 0.25;
-      const obj = {
-        x: Math.random() * (canvas.width - 40),
-        y: canvas.height - 160 - Math.random()*100,
-        size: 40,
-        type: isBomb ? "bomb" : "gift",
-        collected: false
-      };
-      objects.push(obj);
+  arr.forEach(p => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `<td>${p.nome}</td><td>${p.punti}</td>`;
+    table.appendChild(tr);
+  });
+}
 
-      setTimeout(() => {
-        obj.fade = true;
-        setTimeout(() => objects = objects.filter(o => o !== obj), 300);
-      }, 2000);
-    }
-    setInterval(spawnObject, 1500);
+/* START GAME */
+santaImg.onload = () => {
+  updateTimer();
+  gameLoop();
+};
 
-    function moveSanta() {
-      if (keys["ArrowLeft"]) santa.x -= santa.speed;
-      if (keys["ArrowRight"]) santa.x += santa.speed;
+/* RIPROVA */
+document.getElementById("retry-btn").addEventListener("click", () => location.reload());
 
-      santa.y += santa.vy;
-      santa.vy += 0.6;
-
-      if (santa.y > canvas.height - 120) {
-        santa.y = canvas.height - 120;
-        santa.vy = 0;
-        santa.jumping = false;
-      }
-
-      if (santa.x < 0) santa.x = 0;
-      if (santa.x + santa.w > canvas.width) santa.x = canvas.width - santa.w;
-    }
-
-    function checkCollisions() {
-      objects.forEach(o => {
-        if (!o.collected &&
-            santa.x < o.x + o.size &&
-            santa.x + santa.w > o.x &&
-            santa.y < o.y + o.size &&
-            santa.y + santa.h > o.y) {
-
-          o.collected = true;
-
-          if (o.type === "gift") score += 10;
-          else score -= 5;
-
-          objects = objects.filter(x => x !== o);
-        }
-      });
-    }
-
-    function draw() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.drawImage(santaImg, santa.x, santa.y, santa.w, santa.h);
-
-      objects.forEach(o => {
-        ctx.globalAlpha = o.fade ? 0.5 : 1;
-        ctx.drawImage(o.type === "gift" ? giftImg : bombImg, o.x, o.y, o.size, o.size);
-        ctx.globalAlpha = 1;
-      });
-
-      document.getElementById("info").textContent =
-        `🎁 ${nome} | Punti: ${score} | ⏱️ ${timeLeft}s`;
-    }
-
-    function gameLoop() {
-      moveSanta();
-      checkCollisions();
-      draw();
-
-      if (timeLeft > 0)
-        requestAnimationFrame(gameLoop);
-    }
-
-    /* FINE GIOCO */
-    function endGame() {
-      canvas.style.display = "none";
-      document.getElementById("info").style.display = "none";
-
-      document.getElementById("fine").style.display = "flex";
-      document.getElementById("messaggio").textContent =
-        `🎉 Bravo ${nome}! Hai totalizzato ${score} punti!`;
-
-      salvaPunteggio(nome, score);
-      mostraClassifica();
-    }
-
-    /* CLASSIFICA */
-    function salvaPunteggio(nome, punti) {
-      const key = "punteggi_giorno1";
-
-      const nomeAnonimo = anonimizzaNome(nome);
-
-      let punteggi = JSON.parse(localStorage.getItem(key)) || [];
-      punteggi.push({ nome: nomeAnonimo, punti });
-      punteggi.sort((a, b) => b.punti - a.punti);
-      localStorage.setItem(key, JSON.stringify(punteggi));
-    }
-
-    function mostraClassifica() {
-      const key = "punteggi_giorno1";
-      const punteggi = JSON.parse(localStorage.getItem(key)) || [];
-      const table = document.getElementById("score-table");
-
-      table.innerHTML = "<tr><th>Nome</th><th>Punti</th></tr>";
-
-      punteggi.forEach(p => {
-        const row = document.createElement("tr");
-        row.innerHTML = `<td>${p.nome}</td><td>${p.punti}</td>`;
-        table.appendChild(row);
-      });
-    }
-
-    santaImg.onload = () => {
-      updateTimer();
-      gameLoop();
-    };
-
-    /* BOTTONE RIPROVA */
-    document.getElementById("retry-btn").addEventListener("click", () => {
-      location.reload();
-    });
-
-  </script>
+</script>
 
 </body>
 </html>
-
-
-
-
-
-
