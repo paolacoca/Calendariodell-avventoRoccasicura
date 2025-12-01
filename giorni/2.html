@@ -1,180 +1,89 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>🎄 Giorno 2 – Reindeer Runner (Endless)</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🎄 Giorno 2 – Reindeer Runner</title>
 
-  <!-- FONT -->
-  <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
 
-  <!-- FIREBASE -->
-  <script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-database-compat.js"></script>
+<!-- FIREBASE -->
+<script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-database-compat.js"></script>
 
-  <style>
-  /* =======================================================
-     🎨 STILE GENERALE
-  ======================================================== */
-    body {
-      margin: 0;
-      background-color: #7b0412;
-      font-family: 'Ubuntu', sans-serif;
-      color: #fff;
-      text-align: center;
-      overflow-x: hidden;
-    }
-
-    h1 { 
-      color: #ffd700; 
-      margin-top: 10px; 
-    }
-
-  /* =======================================================
-     🖼️ CANVAS – AREA DI GIOCO
-  ======================================================== */
-    canvas {
-      display: none;
-      margin: 20px auto 0;
-      background: url("../img/sfondo_bosco.jpg") center/cover no-repeat;
-      border: 3px solid #f5d97c;
-      border-radius: 10px;
-    }
-
-    .info {
-      display: none;
-      position: fixed;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: rgba(0, 0, 0, 0.4);
-      padding: 8px 16px;
-      border-radius: 12px;
-      border: 1px solid #f5d97c;
-      font-size: 1.1em;
-      z-index: 30;
-    }
-
-  /* =======================================================
-     🏁 POPUP FINALE
-  ======================================================== */
-    #fine {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background: rgba(0,0,0,0.65);
-      backdrop-filter: blur(4px);
-      z-index: 9999;
-      display: none;
-      justify-content: center;
-      align-items: center;
-    }
-
-    .classifica-box {
-      background: #fffaf2;
-      padding: 25px;
-      border-radius: 20px;
-      width: 90%;
-      max-width: 450px;
-      border: 2px solid #ffd700;
-      color: #400000;
-      animation: popup .4s ease-out;
-    }
-
-    @keyframes popup {
-      from { transform: scale(.7); opacity: 0; }
-      to   { transform: scale(1); opacity: 1; }
-    }
-
-    .btn {
-      margin-top: 15px;
-      padding: 12px 30px;
-      border-radius: 30px;
-      font-weight: bold;
-      text-decoration: none;
-      cursor: pointer;
-      color: #fff;
-      background: #7b0412;
-      transition: .3s;
-      display: inline-block;
-    }
-    .btn:hover { background: #ffd700; color: #000; }
-
-  /* =======================================================
-     ▶️ SCHERMATA INIZIALE
-  ======================================================== */
-    #start-screen {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background: rgba(0,0,0,0.60);
-      backdrop-filter: blur(4px);
-      z-index: 9998;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-
-    .start-box {
-      background: #fffaf2;
-      padding: 30px;
-      border-radius: 20px;
-      width: 90%;
-      max-width: 420px;
-      border: 2px solid #ffd700;
-      color: #400000;
-      text-align: center;
-      line-height: 1.5;
-    }
-
-    .start-btn {
-      width: 80%;
-      margin: 10px auto;
-      padding: 14px;
-      border-radius: 30px;
-      font-size: 1.1em;
-      cursor: pointer;
-      background: #7b0412;
-      color: white;
-      border: none;
-    }
-    .start-btn:hover { background: #ffd700; color: #000; }
-
-  /* =======================================================
-     ❄️ NEVE
-  ======================================================== */
-    .snowflake {
-      position: fixed;
-      top: -10px;
-      color: white;
-      font-size: 1.2em;
-      animation: fall linear infinite;
-      pointer-events: none;
-    }
-
-    @keyframes fall {
-      from { transform: translateY(-10px); opacity: 1; }
-      to   { transform: translateY(100vh); opacity: 0.2; }
-    }
-
-  </style>
+<style>
+body {
+  margin: 0;
+  background-color: #7b0412;
+  font-family: 'Ubuntu', sans-serif;
+  color: white;
+  text-align: center;
+}
+canvas {
+  display: none;
+  margin: 20px auto;
+  background: url("../img/sfondo_bosco.jpg") center/cover no-repeat;
+  border: 3px solid #ffd700;
+  border-radius: 10px;
+}
+.info {
+  display: none;
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0,0,0,0.4);
+  padding: 8px 16px;
+  border-radius: 10px;
+  border: 1px solid #ffd700;
+  z-index: 100;
+}
+#start-screen, #fine {
+  position: fixed; top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(5px);
+  z-index: 9998;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+#fine { display: none; z-index: 9999; }
+.start-box, .classifica-box {
+  background: #fffaf2;
+  color: #400000;
+  padding: 25px;
+  border: 2px solid #ffd700;
+  border-radius: 20px;
+  width: 90%;
+  max-width: 450px;
+}
+.start-btn, .btn {
+  margin-top: 12px;
+  padding: 12px 28px;
+  border-radius: 30px;
+  font-weight: bold;
+  cursor: pointer;
+  border: none;
+  background: #7b0412;
+  color: white;
+  width: 80%;
+}
+.btn:hover, .start-btn:hover {
+  background: #ffd700;
+  color: #000;
+}
+</style>
 </head>
 
 <body>
 
 <h1>🎄 Giorno 2 – Reindeer Runner</h1>
 
-<!-- =======================================================
-     ▶️ SCHERMATA INIZIALE CON ISTRUZIONI
-======================================================= -->
+<!-- SCHERMATA INIZIALE -->
 <div id="start-screen">
   <div class="start-box">
-    <p>
-    🌲 Evita gli alberi e supera il tuo record!<br>
-    🦌 Aiuta la renna a correre nel bosco!<br>
-    • Salta e tieni premuto per volare un po’
-    </p>
-
+    <p>🌲 Evita gli alberi<br>🦌 Premi per saltare<br>✨ Salto lungo fino a 15 secondi<br>☁ Nuvole dopo 10 secondi</p>
     <button id="btn-start" class="start-btn">▶️ INIZIA</button>
     <button id="btn-top10" class="start-btn" style="background:#b8860b;">🏆 CLASSIFICA</button>
   </div>
@@ -182,57 +91,45 @@
 
 <!-- AREA DI GIOCO -->
 <canvas id="game"></canvas>
-
-<!-- INFO IN GAME -->
 <div class="info" id="info">Distanza: 0m</div>
 
 <!-- POPUP FINALE -->
 <div id="fine">
   <div class="classifica-box">
     <h2 id="messaggio"></h2>
-
-    <h3>🏆 Top 10 Globale</h3>
-    <table id="score-table">
-      <tr><th>Nome</th><th>Punti</th></tr>
-    </table>
-
+    <h3>🏆 Top 10</h3>
+    <table id="score-table"><tr><th>Nome</th><th>Punti</th></tr></table>
     <button id="retry-btn" class="btn">🔄 Riprova</button>
     <a href="../calendario.html" class="btn">⬅ Calendario</a>
   </div>
 </div>
 
-<!-- MUSICA -->
 <audio id="musica" loop>
   <source src="../audio/jingle_bells_instrumental.mp3" type="audio/mpeg">
 </audio>
 
 <script>
-
-
-/* =======================================================
-   🔥 FIREBASE – CONFIGURAZIONE DATABASE
-======================================================= */
+// -------------------------------------------------------
+// FIREBASE
+// -------------------------------------------------------
 firebase.initializeApp({
   apiKey: "AIzaSyBrI1yThI6zmnYwKE4OHbS8vhrUPrMsnsk",
   authDomain: "calendarioroccasicura.firebaseapp.com",
   databaseURL: "https://calendarioroccasicura-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId: "calendarioroccasicura",
-  storageBucket: "calendarioroccasicura.appspot.com",
-  messagingSenderId: "38731898044",
-  appId: "1:38731898044:web:e89bcfae7c64239fec44b9"
+  projectId: "calendarioroccasicura"
 });
 const db = firebase.database();
 
-/* =======================================================
-   🎭 NOME MASCHERATO – GENERAZIONE USERNAME
-======================================================= */
+// -------------------------------------------------------
+// USERNAME MASCHERATO
+// -------------------------------------------------------
 const nomeReale = localStorage.getItem("utente") || "Ospite";
 const nomeMascherato =
-  nomeReale[0] + Math.floor(Math.random()*900+100) + nomeReale.slice(1);
+  nomeReale[0] + Math.floor(Math.random() * 900 + 100) + nomeReale.slice(1);
 
-/* =======================================================
-   🖼️ CANVAS – MISURE E RESPONSIVE
-======================================================= */
+// -------------------------------------------------------
+// CANVAS + RESPONSIVE
+// -------------------------------------------------------
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 
@@ -248,82 +145,37 @@ function resizeCanvas() {
 resizeCanvas();
 window.addEventListener("resize", resizeCanvas);
 
-/* =======================================================
-   🦌 SPRITES – RENNA, ALBERO E GRAFICA
-======================================================= */
+// -------------------------------------------------------
+// IMMAGINI
+// -------------------------------------------------------
 const rennaImg = new Image();
 rennaImg.src = "../img/renna.png";
 
 const alberoImg = new Image();
 alberoImg.src = "../img/albero.png";
 
-/* =======================================================
-   🎮 VARIABILI DI GIOCO – FISICA, ENDLESS MODE, STATI
-======================================================= */
-let renna = {
-  x: 120,
-  y: canvas.height - 150,
-  w: 110,
-  h: 110,
-  vy: 0,
-  jumping: false
-};
+const cloudImg = new Image();
+cloudImg.src = "../img/cloud.png";
 
+// -------------------------------------------------------
+// VARIABILI GIOCO
+// -------------------------------------------------------
+let renna = { x: 120, y: 300, w: 110, h: 110, vy: 0, jumping: false };
 let ostacoli = [];
 let distanza = 0;
 let giocoTerminato = false;
 
-/* SALTO PROLUNGATO */
 let saltoLungo = false;
 let tempoInAria = 0;
 
-/* NUVOLETTA (dopo 5s) */
-let nuvolaAttiva = false;
-let nuvola = { x: 0, y: 0, size: 90 };
+let nuvole = [];
+let nuvoleAttive = false;
 
-/* OSTACOLI DISTANZA MINIMA */
-let distanzaMinima = 650;
-
-/* EVITA DOPPIO SALVATAGGIO */
 let punteggioSalvato = false;
 
-/* EVITA DOPPI CARICAMENTI CLASSIFICA */
-let classificaCaricata = false;
-
-
-
-
-/* =======================================================
-   🎮 INPUT – SALTO NORMALE + SALTO PROLUNGATO
-======================================================= */
-
-/* Keyboard */
-window.addEventListener("keydown", e => {
-  if (e.code === "Space" || e.code === "ArrowUp") {
-    e.preventDefault();
-    saltoLungo = true;
-    if (!renna.jumping) jump();
-  }
-});
-window.addEventListener("keyup", e => {
-  if (e.code === "Space" || e.code === "ArrowUp") saltoLungo = false;
-});
-
-/* Mouse */
-canvas.addEventListener("mousedown", () => {
-  saltoLungo = true;
-  if (!renna.jumping) jump();
-});
-canvas.addEventListener("mouseup", () => saltoLungo = false);
-
-/* Touch */
-canvas.addEventListener("touchstart", () => {
-  saltoLungo = true;
-  if (!renna.jumping) jump();
-});
-canvas.addEventListener("touchend", () => saltoLungo = false);
-
-/* Salto singolo */
+// -------------------------------------------------------
+// INPUT
+// -------------------------------------------------------
 function jump() {
   if (!renna.jumping) {
     renna.vy = -16;
@@ -332,130 +184,160 @@ function jump() {
   }
 }
 
-/* =======================================================
-   🌲 OSTACOLI – DISTANZA MINIMA
-======================================================= */
+window.addEventListener("keydown", e => {
+  if (["Space", "ArrowUp"].includes(e.code)) {
+    saltoLungo = true;
+    if (!renna.jumping) jump();
+  }
+});
+window.addEventListener("keyup", () => saltoLungo = false);
+
+canvas.addEventListener("mousedown", () => { saltoLungo = true; if (!renna.jumping) jump(); });
+canvas.addEventListener("mouseup", () => saltoLungo = false);
+canvas.addEventListener("touchstart", () => { saltoLungo = true; if (!renna.jumping) jump(); });
+canvas.addEventListener("touchend", () => saltoLungo = false);
+
+// -------------------------------------------------------
+// OSTACOLI
+// -------------------------------------------------------
 function generaOstacolo() {
-  if (nuvoleDiscesaAttive) return;
-  ostacoli.push({
-    x: canvas.width + 20,
-    y: canvas.height - 120,
-    w: 70,
-    h: 100
-  });
+  if (nuvoleAttive) return;
+  ostacoli.push({ x: canvas.width + 20, y: canvas.height - 120, w: 70, h: 100 });
 }
 
 function gestisciOstacoli() {
   if (ostacoli.length === 0) generaOstacolo();
   const ultimo = ostacoli[ostacoli.length - 1];
-  if (ultimo.x < canvas.width - distanzaMinima) generaOstacolo();
+  if (ultimo.x < canvas.width - 650) generaOstacolo();
 }
 
-/* =======================================================
-   ☁️ NUVOLA PNG – DOPO 10s DA SINISTRA
-======================================================= */
-
-let nuvoleDiscesa = [];
-let nuvoleDiscesaAttive = false;
-let tempoInAria = 0;
-
-function generaNuvoleDiDiscesa() {
-
-  const startY = renna.y + 80;
-
-  nuvoleDiscesa = [
-    { x: -250, y: startY, w: 180, h: 120, speed: 6 },
-    { x: -450, y: startY, w: 180, h: 120, speed: 6 },
-    { x: -650, y: startY, w: 180, h: 120, speed: 6 }
+// -------------------------------------------------------
+// NUVOLI DOPO 10 SECONDI
+// -------------------------------------------------------
+function generaNuvole() {
+  const baseY = renna.y + 80;
+  nuvole = [
+    { x: -300, y: baseY, w: 180, h: 120, speed: 6 },
+    { x: -500, y: baseY, w: 180, h: 120, speed: 6 },
+    { x: -700, y: baseY, w: 180, h: 120, speed: 6 }
   ];
+  nuvoleAttive = true;
 
-  nuvoleDiscesaAttive = true;
-
-  // Nessun albero nel punto dove deve cadere
+  // rimuovi alberi sotto
   ostacoli = ostacoli.filter(o => o.x > renna.x + 350);
 }
 
-function disegnaNuvoleDiDiscesa() {
-  nuvoleDiscesa.forEach(n => {
+function disegnaNuvole() {
+  nuvole.forEach(n => {
     n.x += n.speed;
     ctx.drawImage(cloudImg, n.x, n.y, n.w, n.h);
   });
 }
 
-function gestisciAtterraggioSuNuvole() {
-  if (!nuvoleDiscesaAttive) return;
+function controllaAtterraggioNuvole() {
+  if (!nuvoleAttive) return;
 
-  nuvoleDiscesa.forEach(n => {
+  nuvole.forEach(n => {
     if (
       renna.x + renna.w > n.x &&
       renna.x < n.x + n.w &&
       renna.y + renna.h >= n.y &&
-      renna.y + renna.h <= n.y + (n.h * 0.7)
+      renna.y + renna.h <= n.y + n.h * 0.7
     ) {
       renna.y = n.y - renna.h;
       renna.vy = 0;
       renna.jumping = false;
       tempoInAria = 0;
-      nuvoleDiscesaAttive = false;
+      nuvoleAttive = false;
     }
   });
 }
 
-/* =======================================================
-   🔁 GAME LOOP COMPLETO
-======================================================= */
+// -------------------------------------------------------
+// FINE GIOCO
+// -------------------------------------------------------
+function fineGioco() {
+  giocoTerminato = true;
+  document.getElementById("fine").style.display = "flex";
+  document.getElementById("messaggio").textContent =
+    `Hai percorso ${Math.floor(distanza)} metri!`;
+
+  if (!punteggioSalvato) {
+    db.ref("giorno2").push({ nome: nomeMascherato, punti: Math.floor(distanza) });
+    punteggioSalvato = true;
+  }
+
+  caricaClassifica();
+}
+
+// -------------------------------------------------------
+// CLASSIFICA
+// -------------------------------------------------------
+function caricaClassifica() {
+  db.ref("giorno2")
+    .orderByChild("punti")
+    .limitToLast(10)
+    .once("value", snap => {
+      const table = document.getElementById("score-table");
+      table.innerHTML = "<tr><th>Nome</th><th>Punti</th></tr>";
+
+      let arr = [];
+      snap.forEach(s => arr.push(s.val()));
+      arr.reverse().forEach(r => {
+        table.innerHTML += `<tr><td>${r.nome}</td><td>${r.punti}</td></tr>`;
+      });
+    });
+}
+
+// -------------------------------------------------------
+// GAME LOOP
+// -------------------------------------------------------
 function gameLoop() {
   if (giocoTerminato) return;
+  ctx.clearRect(0,0,canvas.width,canvas.height);
 
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-  /* ✈️ Salto prolungato fino a 15 secondi */
-  if (saltoLungo && renna.jumping && !nuvoleDiscesaAttive) {
+  // salto lungo fino 15s
+  if (saltoLungo && renna.jumping && !nuvoleAttive) {
     tempoInAria += 1/60;
     if (tempoInAria < 15) renna.vy = -6;
   }
 
-  /* Nuvole PNG dopo 10 secondi */
-  if (tempoInAria > 10 && !nuvoleDiscesaAttive) generaNuvoleDiDiscesa();
+  // nuvole dopo 10s
+  if (tempoInAria > 10 && !nuvoleAttive) generaNuvole();
 
-  /* Gravità */
+  // fisica
   renna.y += renna.vy;
   renna.vy += 0.8;
 
-  /* LIMITE SUPERIORE */
-  const limiteAlto = canvas.height * 0.12;
-  if (renna.y < limiteAlto) {
-    renna.y = limiteAlto;
+  // limite alto
+  if (renna.y < canvas.height * 0.1) {
+    renna.y = canvas.height * 0.1;
     renna.vy = 2;
   }
 
-  /* 🚫 LIMITE DEL TERRENO (fisso sotto gli alberi) */
+  // terra
   const terreno = canvas.height - 150;
   if (renna.y > terreno) {
     renna.y = terreno;
     renna.vy = 0;
     renna.jumping = false;
     tempoInAria = 0;
-    nuvoleDiscesaAttive = false;
+    nuvoleAttive = false;
   }
 
-  /* Disegna renna */
   ctx.drawImage(rennaImg, renna.x, renna.y, renna.w, renna.h);
 
-  /* Nuvole PNG */
-  if (nuvoleDiscesaAttive) {
-    disegnaNuvoleDiDiscesa();
-    gestisciAtterraggioSuNuvole();
+  if (nuvoleAttive) {
+    disegnaNuvole();
+    controllaAtterraggioNuvole();
   }
 
-  /* 💥 OSTACOLI */
+  // ostacoli
   gestisciOstacoli();
-
   ostacoli.forEach((o, i) => {
     o.x -= 6;
     ctx.drawImage(alberoImg, o.x, o.y - 30, o.w, o.h);
 
-    // Collisione
     if (
       renna.x < o.x + o.w &&
       renna.x + renna.w > o.x &&
@@ -465,13 +347,36 @@ function gameLoop() {
       fineGioco();
     }
 
-    if (o.x + o.w < 0) ostacoli.splice(i, 1);
+    if (o.x + o.w < 0) ostacoli.splice(i,1);
   });
 
-  /* Distanza */
-  distanza += 0.35;
-  document.getElementById("info").textContent =
-    `Distanza: ${Math.floor(distanza)}m`;
+  // distanza
+  distanza += 0.3;
+  document.getElementById("info").textContent = `Distanza: ${Math.floor(distanza)}m`;
 
   requestAnimationFrame(gameLoop);
 }
+
+// -------------------------------------------------------
+// BOTTONI
+// -------------------------------------------------------
+document.getElementById("btn-start").onclick = () => {
+  document.getElementById("start-screen").style.display = "none";
+  document.getElementById("info").style.display = "block";
+  canvas.style.display = "block";
+  document.getElementById("musica").play();
+  gameLoop();
+};
+
+document.getElementById("retry-btn").onclick = () => location.reload();
+document.getElementById("btn-top10").onclick = () => {
+  document.getElementById("start-screen").style.display = "none";
+  document.getElementById("fine").style.display = "flex";
+  caricaClassifica();
+};
+</script>
+
+</body>
+</html>
+
+
