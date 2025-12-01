@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🎄 Giorno 2 – Reindeer Runner</title>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: "Ubuntu", sans-serif;
+      background: #102018;
+      color: white;
+      overflow: hidden;
+    }
+
+    #game-container {
+      position: relative;
+      width: 100%;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    canvas {
+      background: url("../img/sfondo_bosco.jpg") center/cover no-repeat;
+      display: block;
+      margin: 0 auto;
+    }
+
+    #timer, #score {
+      position: absolute;
+      top: 15px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 22px;
+      font-weight: bold;
+      text-shadow: 2px 2px 4px black;
+    }
+
+    #score {
+      top: 55px;
+    }
+
+    /* POPUP FINALE */
+    #popup {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.8);
+      display: none;
+      justify-content: center;
+      align-items: center;
+    }
+
+    #popup-content {
+      background: white;
+      color: black;
+      padding: 25px;
+      border-radius: 12px;
+      width: 85%;
+      max-width: 400px;
+      text-align: center;
+    }
+
+    #popup button {
+      padding: 10px 20px;
+      margin-top: 10px;
+      background: #d40000;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+  </style>
+</head>
+
+<body>
+
+  <div id="game-container">
+    <div id="timer">⏳ 45s</div>
+    <div id="score">Distanza: 0 m</div>
+    <canvas id="canvas" width="800" height="400"></canvas>
+  </div>
+
+  <!-- POPUP FINALE -->
+  <div id="popup">
+    <div id="popup-content">
+      <h2>🎉 Complimenti!</h2>
+      <p id="final-score"></p>
+      <button onclick="window.location.reload()">Rigioca</button>
+      <button onclick="salvaPunteggio()">Salva in classifica</button>
+    </div>
+  </div>
+
+<script>
+/* ===========================
+   🎅 CARICO IMMAGINI
+=========================== */
+
+const imgRenna = new Image();
+imgRenna.src = "../img/renna.png";   // renna che hai inviato
+
+const imgAlbero = new Image();
+imgAlbero.src = "../img/albero.png"; // ostacolo
+
+/* ===========================
+   🎄 CANVAS & PARAMETRI
+=========================== */
+
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+
+let reindeer = {
+  x: 80,
+  y: 260,
+  width: 120,
+  height: 120,
+  dy: 0,
+  jumpForce: -12,
+  gravity: 0.55,
+  grounded: true
+};
+
+let obstacles = [];
+let frame = 0;
+let distanza = 0;
+let giocoFinito = false;
+let tempo = 45;
+
+/* ===========================
+   🎄 INPUT MULTIPLI
+=========================== */
+
+function jump() {
+  if (reindeer.grounded) {
+    reindeer.dy = reindeer.jumpForce;
+    reindeer.grounded = false;
+  }
+}
+
+window.addEventListener("keydown", e => {
+  if ([" ", "ArrowUp"].includes(e.key)) jump();
+});
+
+window.addEventListener("mousedown", jump);
+window.addEventListener("touchstart", jump);
+
+window.addEventListener("touchmove", e => {
+  const t = e.changedTouches[0];
+  if (t.movementY < -25) jump();
+});
+
+/* ===========================
+   🎄 GENERA OSTACOLI
+=========================== */
+
+function creaOstacolo() {
+  obstacles.push({
+    x: 800,
+    y: 330,
+    width: 70,
+    height: 100
+  });
+}
+
+/* ===========================
+   🎮 GAME LOOP
+=========================== */
+
+function update() {
+  if (giocoFinito) return;
+
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  // RENNA
+  reindeer.dy += reindeer.gravity;
+  reindeer.y += reindeer.dy;
+
+  if (reindeer.y >= 260) {
+    reindeer.y = 260;
+    reindeer.dy = 0;
+    reindeer.grounded = true;
+  }
+
+  ctx.drawImage(imgRenna, reindeer.x, reindeer.y, reindeer.width, reindeer.height);
+
+  // OSTACOLI
+  if (frame % 95 === 0) creaOstacolo();
+
+  obstacles.forEach((obs, index) => {
+    obs.x -= 6;
+    ctx.drawImage(imgAlbero, obs.x, obs.y - 30, obs.width, obs.height);
+
+    // Collisione
+    if (
+      reindeer.x < obs.x + obs.width &&
+      reindeer.x + reindeer.width > obs.x &&
+      reindeer.y < obs.y + obs.height &&
+      reindeer.height + reindeer.y > obs.y
+    ) {
+      fineGioco();
+    }
+
+    if (obs.x + obs.width < 0) obstacles.splice(index, 1);
+  });
+
+  // Punteggio
+  distanza += 0.35;
+  document.getElementById("score").innerText =
+    "Distanza: " + Math.floor(distanza) + " m";
+
+  frame++;
+  requestAnimationFrame(update);
+}
+
+/* ===========================
+   ⏳ TIMER
+=========================== */
+
+function countdown() {
+  let intervallo = setInterval(() => {
+    tempo--;
+    document.getElementById("timer").innerText = "⏳ " + tempo + "s";
+
+    if (tempo <= 0) {
+      clearInterval(intervallo);
+      fineGioco();
+    }
+  }, 1000);
+}
+
+/* ===========================
+   🎁 FINE GIOCO
+=========================== */
+
+function fineGioco() {
+  giocoFinito = true;
+
+  document.getElementById("popup").style.display = "flex";
+  document.getElementById("final-score").innerText =
+    "Hai percorso " + Math.floor(distanza) + " metri!";
+}
+
+/* ===========================
+   ⭐ SALVA CLASSIFICA GLOBALE
+=========================== */
+
+function salvaPunteggio() {
+  const username = localStorage.getItem("username") || "Anonimo";
+  const punteggio = Math.floor(distanza);
+
+  // 🔥 FUNZIONE DA COLLEGARE ALLA TUA TOP10 (GIORNO 1)
+  salvaClassificaGlobale(2, username, punteggio);
+
+  alert("Punteggio salvato!");
+}
+
+/* Se non è definita, avvisa */
+function salvaClassificaGlobale() {
+  console.warn("⚠ Devi collegare la funzione di classifica globale!");
+}
+
+/* ===========================
+   ▶ AVVIO
+=========================== */
+
+update();
+countdown();
+</script>
+
+</body>
+</html>
