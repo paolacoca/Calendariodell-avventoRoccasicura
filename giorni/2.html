@@ -1,76 +1,163 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>🎄 Giorno 2 – Reindeer Runner</title>
+
+  <!-- FONT -->
+  <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
+
+  <!-- FIREBASE -->
+  <script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-database-compat.js"></script>
 
   <style>
     body {
       margin: 0;
-      font-family: "Ubuntu", sans-serif;
-      background: #102018;
-      color: white;
-      overflow: hidden;
+      background-color: #7b0412; /* colore base Giorno 1 */
+      font-family: 'Ubuntu', sans-serif;
+      color: #fff;
+      text-align: center;
+      overflow-x: hidden;
     }
 
-    #game-container {
-      position: relative;
-      width: 100%;
-      height: 100vh;
-      overflow: hidden;
+    h1 {
+      color: #ffd700;
+      margin-top: 10px;
     }
 
     canvas {
-      background: url("../img/sfondo_bosco.jpg") center/cover no-repeat;
-      display: block;
-      margin: 0 auto;
+      display: none;
+      margin: 20px auto 0;
+      background: url("../img/gioco1_sfondo.png") center/cover no-repeat;
+      border: 3px solid #f5d97c;
+      border-radius: 10px;
+      touch-action: none;
     }
 
-    #timer, #score {
-      position: absolute;
-      top: 15px;
+    .info {
+      display: none;
+      position: fixed;
+      bottom: 20px;
       left: 50%;
       transform: translateX(-50%);
-      font-size: 22px;
-      font-weight: bold;
-      text-shadow: 2px 2px 4px black;
-    }
-
-    #score {
-      top: 55px;
+      background: rgba(0, 0, 0, 0.4);
+      padding: 8px 16px;
+      border-radius: 12px;
+      border: 1px solid #f5d97c;
+      font-size: 1.1em;
+      z-index: 30;
     }
 
     /* POPUP FINALE */
-    #popup {
+    #fine {
       position: fixed;
       top: 0; left: 0;
       width: 100%; height: 100%;
-      background: rgba(0,0,0,0.8);
+      background: rgba(0,0,0,0.65);
+      backdrop-filter: blur(4px);
+      z-index: 9999;
       display: none;
       justify-content: center;
       align-items: center;
     }
 
-    #popup-content {
-      background: white;
-      color: black;
+    .classifica-box {
+      background: #fffaf2;
       padding: 25px;
-      border-radius: 12px;
-      width: 85%;
-      max-width: 400px;
+      border-radius: 20px;
+      width: 90%;
+      max-width: 450px;
+      border: 2px solid #ffd700;
+      color: #400000;
+      animation: popup .4s ease-out;
+    }
+
+    @keyframes popup {
+      from { transform: scale(.7); opacity: 0; }
+      to   { transform: scale(1); opacity: 1; }
+    }
+
+    .btn {
+      display: inline-block;
+      margin-top: 15px;
+      padding: 12px 30px;
+      border-radius: 30px;
+      font-weight: bold;
+      text-decoration: none;
+      cursor: pointer;
+      color: #fff;
+      background: #7b0412;
+      transition: .3s;
+    }
+    .btn:hover { background: #ffd700; color: #000; }
+
+    /* MENU INIZIALE */
+    #start-screen {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.60);
+      backdrop-filter: blur(4px);
+      z-index: 9998;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .start-box {
+      background: #fffaf2;
+      padding: 30px;
+      border-radius: 20px;
+      width: 90%;
+      max-width: 420px;
+      border: 2px solid #ffd700;
+      color: #400000;
       text-align: center;
     }
 
-    #popup button {
-      padding: 10px 20px;
-      margin-top: 10px;
-      background: #d40000;
+    .start-btn {
+      width: 80%;
+      margin: 10px auto;
+      padding: 14px;
+      border-radius: 30px;
+      font-size: 1.1em;
+      cursor: pointer;
+      background: #7b0412;
       color: white;
       border: none;
-      border-radius: 8px;
-      font-size: 16px;
-      cursor: pointer;
+    }
+
+    .start-btn:hover {
+      background: #ffd700;
+      color: #000;
+    }
+
+    table {
+      width: 100%;
+      margin-top: 15px;
+    }
+
+    th, td {
+      padding: 8px;
+      text-align: center;
+      border-bottom: 1px solid #d7bb5f;
+    }
+
+    /* ❄️ NEVE */
+    .snowflake {
+      position: fixed;
+      top: -10px;
+      color: white;
+      font-size: 1.2em;
+      animation: fall linear infinite;
+      pointer-events: none;
+    }
+
+    @keyframes fall {
+      from { transform: translateY(-10px); opacity: 1; }
+      to   { transform: translateY(100vh); opacity: 0.2; }
     }
 
   </style>
@@ -78,197 +165,282 @@
 
 <body>
 
-  <div id="game-container">
-    <div id="timer">⏳ 45s</div>
-    <div id="score">Distanza: 0 m</div>
-    <canvas id="canvas" width="800" height="400"></canvas>
-  </div>
+<h1>🎄 Giorno 2 – Reindeer Runner</h1>
 
-  <!-- POPUP FINALE -->
-  <div id="popup">
-    <div id="popup-content">
-      <h2>🎉 Complimenti!</h2>
-      <p id="final-score"></p>
-      <button onclick="window.location.reload()">Rigioca</button>
-      <button onclick="salvaPunteggio()">Salva in classifica</button>
-    </div>
+<!-- MENU INIZIALE -->
+<div id="start-screen">
+  <div class="start-box">
+    <h2>🦌 Inizia il Gioco!</h2>
+    <p>Fai saltare la renna ed evita gli alberi!<br>
+       Rimani in corsa per 45 secondi.</p>
+
+    <button id="btn-start" class="start-btn">▶️ INIZIA GIOCO</button>
+    <button id="btn-top10" class="start-btn" style="background:#b8860b;">🏆 CLASSIFICA GLOBALE</button>
   </div>
+</div>
+
+<canvas id="game"></canvas>
+<div class="info" id="info">Distanza: 0m | ⏱️ 45s</div>
+
+<!-- POPUP CLASSIFICA -->
+<div id="fine">
+  <div class="classifica-box">
+    <h2 id="messaggio"></h2>
+
+    <h3>🏆 Top 10 Globale</h3>
+    <table id="score-table">
+      <tr><th>Nome</th><th>Punti</th></tr>
+    </table>
+
+    <button id="retry-btn" class="btn" style="background:#d41e1e;">🔄 Riprova</button>
+    <a href="../calendario.html" class="btn">⬅ Torna al Calendario</a>
+  </div>
+</div>
 
 <script>
-/* ===========================
-   🎅 CARICO IMMAGINI
-=========================== */
+/* =======================================================
+   🔥 FIREBASE CONFIG
+======================================================= */
+firebase.initializeApp({
+  apiKey: "AIzaSyBrI1yThI6zmnYwKE4OHbS8vhrUPrMsnsk",
+  authDomain: "calendarioroccasicura.firebaseapp.com",
+  databaseURL: "https://calendarioroccasicura-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "calendarioroccasicura",
+  storageBucket: "calendarioroccasicura.appspot.com",
+  messagingSenderId: "38731898044",
+  appId: "1:38731898044:web:e89bcfae7c64239fec44b9"
+});
+const db = firebase.database();
 
-const imgRenna = new Image();
-imgRenna.src = "../img/renna.png";   // renna che hai inviato
+/* =======================================================
+   🎭 NOME MASCHERATO
+======================================================= */
+const nomeReale = localStorage.getItem("utente") || "Ospite";
+const nomeMascherato =
+  nomeReale[0] +
+  Math.floor(Math.random()*900+100) +
+  nomeReale.slice(1);
 
-const imgAlbero = new Image();
-imgAlbero.src = "../img/albero.png"; // ostacolo
-
-/* ===========================
-   🎄 CANVAS & PARAMETRI
-=========================== */
-
-const canvas = document.getElementById("canvas");
+/* =======================================================
+   🎮 CANVAS
+======================================================= */
+const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 
-let reindeer = {
-  x: 80,
-  y: 260,
-  width: 120,
-  height: 120,
-  dy: 0,
-  jumpForce: -12,
-  gravity: 0.55,
-  grounded: true
+function resizeCanvas() {
+  if (window.innerWidth < 700) {
+    canvas.width = window.innerWidth - 20;
+    canvas.height = window.innerHeight * 0.55;
+  } else {
+    canvas.width = 900;
+    canvas.height = 500;
+  }
+}
+resizeCanvas();
+window.addEventListener("resize", resizeCanvas);
+
+/* =======================================================
+   🦌 RENNA
+======================================================= */
+const renna = {
+  x: 120,
+  y: canvas.height - 150,
+  w: 110,
+  h: 110,
+  vy: 0,
+  jumping: false
 };
 
-let obstacles = [];
-let frame = 0;
+const rennaImg = new Image();
+rennaImg.src = "../img/renna.png";
+
+const alberoImg = new Image();
+alberoImg.src = "../img/albero.png";
+
+let ostacoli = [];
 let distanza = 0;
-let giocoFinito = false;
 let tempo = 45;
 
-/* ===========================
-   🎄 INPUT MULTIPLI
-=========================== */
-
+/* =======================================================
+   🎮 INPUT
+======================================================= */
 function jump() {
-  if (reindeer.grounded) {
-    reindeer.dy = reindeer.jumpForce;
-    reindeer.grounded = false;
+  if (!renna.jumping) {
+    renna.vy = -17;
+    renna.jumping = true;
   }
 }
 
 window.addEventListener("keydown", e => {
-  if ([" ", "ArrowUp"].includes(e.key)) jump();
+  if (e.code === "Space" || e.code === "ArrowUp") jump();
 });
 
-window.addEventListener("mousedown", jump);
-window.addEventListener("touchstart", jump);
+canvas.addEventListener("mousedown", jump);
+canvas.addEventListener("touchstart", jump);
 
-window.addEventListener("touchmove", e => {
-  const t = e.changedTouches[0];
-  if (t.movementY < -25) jump();
-});
-
-/* ===========================
-   🎄 GENERA OSTACOLI
-=========================== */
-
-function creaOstacolo() {
-  obstacles.push({
-    x: 800,
-    y: 330,
-    width: 70,
-    height: 100
+/* =======================================================
+   🌲 GENERA OSTACOLI
+======================================================= */
+function generaOstacolo() {
+  ostacoli.push({
+    x: canvas.width + 20,
+    y: canvas.height - 120,
+    w: 70,
+    h: 100
   });
 }
 
-/* ===========================
-   🎮 GAME LOOP
-=========================== */
+/* =======================================================
+   ❄️ NEVE
+======================================================= */
+function creaNeve() {
+  const snow = document.createElement("div");
+  snow.className = "snowflake";
+  snow.textContent = "❄";
+  snow.style.left = Math.random()*100 + "vw";
+  snow.style.animationDuration = (3 + Math.random()*5) + "s";
+  snow.style.fontSize = (14 + Math.random()*10) + "px";
 
-function update() {
-  if (giocoFinito) return;
+  document.body.appendChild(snow);
+  setTimeout(() => snow.remove(), 8000);
+}
+setInterval(creaNeve, 200);
 
+/* =======================================================
+   🕹️ GAME LOOP
+======================================================= */
+function gameLoop() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
   // RENNA
-  reindeer.dy += reindeer.gravity;
-  reindeer.y += reindeer.dy;
+  renna.y += renna.vy;
+  renna.vy += 0.8;
 
-  if (reindeer.y >= 260) {
-    reindeer.y = 260;
-    reindeer.dy = 0;
-    reindeer.grounded = true;
+  if (renna.y > canvas.height - 150) {
+    renna.y = canvas.height - 150;
+    renna.jumping = false;
   }
 
-  ctx.drawImage(imgRenna, reindeer.x, reindeer.y, reindeer.width, reindeer.height);
+  ctx.drawImage(rennaImg, renna.x, renna.y, renna.w, renna.h);
 
   // OSTACOLI
-  if (frame % 95 === 0) creaOstacolo();
+  if (Math.random() < 0.025) generaOstacolo();
 
-  obstacles.forEach((obs, index) => {
-    obs.x -= 6;
-    ctx.drawImage(imgAlbero, obs.x, obs.y - 30, obs.width, obs.height);
+  ostacoli.forEach((o, i) => {
+    o.x -= 6;
+    ctx.drawImage(alberoImg, o.x, o.y - 30, o.w, o.h);
 
-    // Collisione
+    // COLLISIONE
     if (
-      reindeer.x < obs.x + obs.width &&
-      reindeer.x + reindeer.width > obs.x &&
-      reindeer.y < obs.y + obs.height &&
-      reindeer.height + reindeer.y > obs.y
+      renna.x < o.x + o.w &&
+      renna.x + renna.w > o.x &&
+      renna.y < o.y + o.h &&
+      renna.y + renna.h > o.y
     ) {
       fineGioco();
     }
 
-    if (obs.x + obs.width < 0) obstacles.splice(index, 1);
+    if (o.x + o.w < 0) ostacoli.splice(i, 1);
   });
 
-  // Punteggio
   distanza += 0.35;
-  document.getElementById("score").innerText =
-    "Distanza: " + Math.floor(distanza) + " m";
+  document.getElementById("info").textContent =
+    `Distanza: ${Math.floor(distanza)}m | ⏱️ ${tempo}s`;
 
-  frame++;
-  requestAnimationFrame(update);
+  if (tempo > 0) requestAnimationFrame(gameLoop);
 }
 
-/* ===========================
+/* =======================================================
    ⏳ TIMER
-=========================== */
-
+======================================================= */
 function countdown() {
-  let intervallo = setInterval(() => {
+  const timer = setInterval(() => {
     tempo--;
-    document.getElementById("timer").innerText = "⏳ " + tempo + "s";
-
     if (tempo <= 0) {
-      clearInterval(intervallo);
+      clearInterval(timer);
       fineGioco();
     }
   }, 1000);
 }
 
-/* ===========================
-   🎁 FINE GIOCO
-=========================== */
-
+/* =======================================================
+   ⭐ FINE GIOCO
+======================================================= */
 function fineGioco() {
-  giocoFinito = true;
+  canvas.style.display = "none";
+  document.getElementById("info").style.display = "none";
+  document.getElementById("fine").style.display = "flex";
 
-  document.getElementById("popup").style.display = "flex";
-  document.getElementById("final-score").innerText =
-    "Hai percorso " + Math.floor(distanza) + " metri!";
+  const puntiFinali = Math.floor(distanza);
+
+  document.getElementById("messaggio").textContent =
+    `🎉 Bravo ${nomeMascherato}! Hai percorso ${puntiFinali} metri!`;
+
+  salvaOnline(nomeMascherato, puntiFinali);
 }
 
-/* ===========================
-   ⭐ SALVA CLASSIFICA GLOBALE
-=========================== */
-
-function salvaPunteggio() {
-  const username = localStorage.getItem("username") || "Anonimo";
-  const punteggio = Math.floor(distanza);
-
-  // 🔥 FUNZIONE DA COLLEGARE ALLA TUA TOP10 (GIORNO 1)
-  salvaClassificaGlobale(2, username, punteggio);
-
-  alert("Punteggio salvato!");
+/* =======================================================
+   📡 SALVA TOP 10 GIORNO 2
+======================================================= */
+function salvaOnline(nome, punti) {
+  db.ref("punteggi/giorno2").push({
+    nome,
+    punti,
+    timestamp: Date.now()
+  }).then(() => caricaClassifica());
 }
 
-/* Se non è definita, avvisa */
-function salvaClassificaGlobale() {
-  console.warn("⚠ Devi collegare la funzione di classifica globale!");
+/* =======================================================
+   📡 CARICA TOP 10
+======================================================= */
+function caricaClassifica() {
+  const table = document.getElementById("score-table");
+  table.innerHTML = "<tr><th>Nome</th><th>Punti</th></tr>";
+
+  db.ref("punteggi/giorno2")
+    .orderByChild("punti")
+    .limitToLast(10)
+    .once("value", snap => {
+      let lista = [];
+      snap.forEach(child => lista.push(child.val()));
+      lista.sort((a,b) => b.punti - a.punti);
+
+      lista.forEach(row => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `<td>${row.nome}</td><td>${row.punti}</td>`;
+        table.appendChild(tr);
+      });
+    });
 }
 
-/* ===========================
-   ▶ AVVIO
-=========================== */
+/* =======================================================
+   ▶ AVVIO GIOCO
+======================================================= */
+document.getElementById("btn-start").addEventListener("click", () => {
+  document.getElementById("start-screen").style.display = "none";
 
-update();
-countdown();
+  canvas.style.display = "block";
+  document.getElementById("info").style.display = "block";
+
+  countdown();
+  gameLoop();
+});
+
+document.getElementById("btn-top10").addEventListener("click", () => {
+  document.getElementById("start-screen").style.display = "none";
+  document.getElementById("fine").style.display = "flex";
+  caricaClassifica();
+});
+
+/* RIPROVA */
+document.getElementById("retry-btn").addEventListener("click", () => location.reload());
+
 </script>
+
+<!-- COUNTER DEV -->
+<script src="https://cdn.counter.dev/script.js"
+data-id="9d666b79-dc20-433b-8015-ac699700813e"
+data-utcoffset="1"></script>
 
 </body>
 </html>
