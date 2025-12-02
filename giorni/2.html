@@ -71,6 +71,7 @@ canvas {
   max-width: 420px;
   border: 2px solid #ffd700;
   color: #400000;
+  text-align: center;
 }
 
 .start-btn {
@@ -85,7 +86,6 @@ canvas {
   border: none;
   font-weight: bold;
 }
-
 .start-btn:hover {
   background: #ffd700;
   color: #400000;
@@ -117,7 +117,7 @@ canvas {
   100% { opacity: 0; transform: scale(2); }
 }
 
-/* FINE GIOCO */
+/* END SCREEN */
 #fine {
   position: fixed;
   top: 0; left: 0;
@@ -152,7 +152,6 @@ canvas {
   background: #7b0412;
   text-decoration: none;
 }
-
 .btn:hover {
   background: #ffd700;
   color: #400000;
@@ -177,7 +176,7 @@ th, td {
   <div class="start-box">
     <p>
       🌲 Evita gli alberi<br>
-      🎁 Regali comuni (+10)<br>
+      🎁 Regali (+10)<br>
       ⭐ Regali d’oro (+50)<br>
       ❤️ 3 vite<br>
       🦌 Tieni premuto per salire<br>
@@ -197,7 +196,7 @@ th, td {
 <!-- GAME -->
 <canvas id="game"></canvas>
 
-<!-- FINE -->
+<!-- END SCREEN -->
 <div id="fine">
   <div class="classifica-box">
     <h2 id="messaggio"></h2>
@@ -217,7 +216,9 @@ th, td {
 </audio>
 
 <script>
-/* ===== FIREBASE ===== */
+/* ============================================
+   FIREBASE
+============================================ */
 firebase.initializeApp({
   apiKey: "AIzaSyBrI1yThI6zmnYwKE4OHbS8vhrUPrMsnsk",
   authDomain: "calendarioroccasicura.firebaseapp.com",
@@ -226,12 +227,16 @@ firebase.initializeApp({
 });
 const db = firebase.database();
 
-/* ===== USER MASK ===== */
+/* ============================================
+   USER MASK
+============================================ */
 const nomeReale = localStorage.getItem("utente") || "Ospite";
 const nomeMascherato =
   nomeReale[0] + Math.floor(Math.random()*900+100) + nomeReale.slice(1);
 
-/* ===== CANVAS ===== */
+/* ============================================
+   CANVAS SETUP
+============================================ */
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 
@@ -244,54 +249,55 @@ function resizeCanvas() {
 resizeCanvas();
 window.addEventListener("resize", resizeCanvas);
 
-/* ===== IMMAGINI ===== */
+/* ============================================
+   IMMAGINI
+============================================ */
 const rennaImg = new Image(); rennaImg.src = "../img/renna.png";
 const alberoImg = new Image(); alberoImg.src = "../img/albero.png";
 const giftImg = new Image(); giftImg.src = "../img/gift.png";
 const giftGoldImg = new Image(); giftGoldImg.src = "../img/gift_gold.png";
 
-/* ===== PARAMETRI ===== */
-const VELOCITA_OSTACOLI = 2;
-const VELOCITA_REGALI = 2;
-const VELOCITA_GRAVITA = 0.55;
+/* ============================================
+   PARAMETRI
+============================================ */
+const V_OSTACOLI = 2.2;
+const V_REGALI = 2.2;
+const V_NEVE = 1;
+const V_GRAV = 0.55;
 
-let renna = {
-  x: 40,
-  y: 0,
-  w: 80,
-  h: 80,
-  vy: 0
-};
-
+let renna = { x: 40, y: 0, w: 80, h: 80, vy: 0 };
 let ostacoli = [];
 let regali = [];
 let fiocchi = [];
-let punteggioTotale = 0;
-let vite = 3;
-let giocoTerminato = false;
-let pulsantePremuto = false;
 
-/* ===== CONTROLLI ===== */
-canvas.addEventListener("touchstart", e => { e.preventDefault(); pulsantePremuto = true; });
-canvas.addEventListener("touchend", () => pulsantePremuto = false);
-canvas.addEventListener("mousedown", () => pulsantePremuto = true);
-canvas.addEventListener("mouseup", () => pulsantePremuto = false);
+let punteggio = 0;
+let vite = 3;
+let pulsante = false;
+let finito = false;
+
+/* ============================================
+   CONTROLLI
+============================================ */
+canvas.addEventListener("touchstart", e => { e.preventDefault(); pulsante = true; });
+canvas.addEventListener("touchend",   () => pulsante = false);
+
+canvas.addEventListener("mousedown", () => pulsante = true);
+canvas.addEventListener("mouseup",   () => pulsante = false);
 
 window.addEventListener("keydown", e => {
-  if (["Space", "ArrowUp"].includes(e.code)) pulsantePremuto = true;
+  if (["Space","ArrowUp"].includes(e.code)) pulsante = true;
 });
 window.addEventListener("keyup", e => {
-  if (["Space", "ArrowUp"].includes(e.code)) pulsantePremuto = false;
+  if (["Space","ArrowUp"].includes(e.code)) pulsante = false;
 });
 
-/* ===== GENERA OSTACOLI DISTANZIATI ===== */
-let ultimoSpawn = Date.now();
-
+/* ============================================
+   GENERA OSTACOLI
+============================================ */
+let ultimoOstacolo = Date.now();
 function generaOstacolo() {
   const ora = Date.now();
-  const distanzaMinimaTempo = 1800; // minimo 1.8s tra un ostacolo e l’altro
-
-  if (ora - ultimoSpawn < distanzaMinimaTempo) return;
+  if (ora - ultimoOstacolo < 1700) return;
 
   ostacoli.push({
     x: canvas.width + 20,
@@ -300,54 +306,61 @@ function generaOstacolo() {
     h: 90
   });
 
-  ultimoSpawn = ora;
+  ultimoOstacolo = ora;
 }
 setInterval(generaOstacolo, 50);
 
-/* ===== GENERA REGALI ===== */
+/* ============================================
+   GENERA REGALI
+============================================ */
 function generaRegalo() {
-  const speciale = Math.random() < 0.10;
-
+  const speciale = Math.random() < 0.12;
   regali.push({
     x: canvas.width + 20,
-    y: canvas.height - (160 + Math.random()*50),
+    y: canvas.height - (160 + Math.random()*60),
     w: speciale ? 55 : 45,
     h: speciale ? 55 : 45,
-    speciale: speciale
+    oro: speciale
   });
 }
 setInterval(generaRegalo, 1900);
 
-/* ===== NEVE ===== */
+/* ============================================
+   NEVE
+============================================ */
 function generaFiocco() {
   fiocchi.push({
     x: Math.random() * canvas.width,
     y: -10,
-    r: Math.random() * 2 + 1,
-    v: Math.random() * 1.2 + 0.3
+    r: Math.random()*2 + 1,
+    v: Math.random()*1.2 + 0.4
   });
 }
 setInterval(generaFiocco, 120);
 
-/* ===== FINE ===== */
+/* ============================================
+   FINE GIOCO
+============================================ */
 function fineGioco() {
-  if (giocoTerminato) return;
-  giocoTerminato = true;
+  if (finito) return;
+  finito = true;
 
   document.getElementById("fine").style.display = "flex";
   document.getElementById("messaggio").textContent =
-    `Hai totalizzato ${punteggioTotale} punti!`;
+    `Hai totalizzato ${punteggio} punti!`;
 
   db.ref("punteggi/giorno2").push({
     nome: nomeMascherato,
-    punti: punteggioTotale,
+    punti: punteggio,
     timestamp: Date.now()
   });
 
   caricaClassifica();
 }
 
-/* ===== CLASSIFICA ===== */
+/* ============================================
+   CLASSIFICA
+============================================ */
 function caricaClassifica() {
   const table = document.getElementById("score-table");
   table.innerHTML = "<tr><th>Nome</th><th>Punti</th></tr>";
@@ -355,20 +368,15 @@ function caricaClassifica() {
   db.ref("punteggi/giorno2")
     .orderByChild("punti")
     .limitToLast(10)
-    .once("value", snapshot => {
-
+    .once("value", snap => {
       let arr = [];
-      snapshot.forEach(ch => {
-        const v = ch.val();
-        arr.push({
-          nome: v.nome,
-          punti: Number(v.punti)
-        });
+      snap.forEach(child => {
+        arr.push(child.val());
       });
 
       arr.sort((a,b)=>b.punti - a.punti);
 
-      arr.forEach(r=>{
+      arr.forEach(r => {
         const tr = document.createElement("tr");
         tr.innerHTML = `<td>${r.nome}</td><td>${r.punti}</td>`;
         table.appendChild(tr);
@@ -376,29 +384,25 @@ function caricaClassifica() {
     });
 }
 
-/* ===== GAME LOOP ===== */
+/* ============================================
+   GAME LOOP
+============================================ */
 function gameLoop() {
-  if (giocoTerminato) return;
+  if (finito) return;
 
   ctx.clearRect(0,0,canvas.width,canvas.height);
 
-  /* Movimento verticale (jetpack) */
-  if (pulsantePremuto) {
-    renna.vy = -5.2;     // salita costante
-  } else {
-    renna.vy += VELOCITA_GRAVITA; // gravità
-  }
+  /* MOVIMENTO RENNA (jetpack) */
+  if (pulsante) renna.vy = -5.2;
+  else renna.vy += V_GRAV;
 
   renna.y += renna.vy;
 
-  /* Limite superiore */
-  const limiteSuperiore = 30;
-  if (renna.y < limiteSuperiore) {
-    renna.y = limiteSuperiore;
+  if (renna.y < 20) {
+    renna.y = 20;
     renna.vy = 0;
   }
 
-  /* Terreno */
   const terreno = canvas.height - 150;
   if (renna.y > terreno) {
     renna.y = terreno;
@@ -407,72 +411,81 @@ function gameLoop() {
 
   ctx.drawImage(rennaImg, renna.x, renna.y, renna.w, renna.h);
 
-  /* ALBERI */
-  ostacoli.forEach((o,i)=>{
-    o.x -= VELOCITA_OSTACOLI;
+  /* ALBERI – FOR INVERSO (no freeze) */
+  for (let i = ostacoli.length - 1; i >= 0; i--) {
+    const o = ostacoli[i];
+    o.x -= V_OSTACOLI;
+
     ctx.drawImage(alberoImg, o.x, o.y, o.w, o.h);
 
-    // collisione
-    if (
+    /* COLLISIONE */
+    const hit =
       renna.x + 20 < o.x + o.w &&
       renna.x + renna.w - 20 > o.x &&
       renna.y + 20 < o.y + o.h &&
-      renna.y + renna.h - 20 > o.y
-    ) {
+      renna.y + renna.h - 20 > o.y;
+
+    if (hit) {
       ostacoli.splice(i,1);
       vite--;
 
-      if (vite <= 0) {
-        fineGioco();
-      }
+      if (vite <= 0) return fineGioco();
 
       document.getElementById("punteggio").textContent =
-        `Punteggio: ${punteggioTotale} | ❤️ ${vite}`;
+        `Punteggio: ${punteggio} | ❤️ ${vite}`;
+
+      continue;
     }
 
     if (o.x + o.w < 0) ostacoli.splice(i,1);
-  });
+  }
 
   /* REGALI */
-  regali.forEach((g,i)=>{
-    g.x -= VELOCITA_REGALI;
-    ctx.drawImage(
-      g.speciale ? giftGoldImg : giftImg,
-      g.x, g.y, g.w, g.h
-    );
+  for (let i = regali.length - 1; i >= 0; i--) {
+    const g = regali[i];
+    g.x -= V_REGALI;
 
-    if (
+    ctx.drawImage(g.oro ? giftGoldImg : giftImg, g.x, g.y, g.w, g.h);
+
+    const preso =
       renna.x < g.x + g.w &&
       renna.x + renna.w > g.x &&
       renna.y < g.y + g.h &&
-      renna.y + renna.h > g.y
-    ) {
-      punteggioTotale += g.speciale ? 50 : 10;
+      renna.y + renna.h > g.y;
+
+    if (preso) {
+      punteggio += g.oro ? 50 : 10;
 
       document.getElementById("punteggio").textContent =
-        `Punteggio: ${punteggioTotale} | ❤️ ${vite}`;
+        `Punteggio: ${punteggio} | ❤️ ${vite}`;
 
       regali.splice(i,1);
+      continue;
     }
 
     if (g.x + g.w < 0) regali.splice(i,1);
-  });
+  }
 
   /* NEVE */
-  fiocchi.forEach((f,i)=>{
+  for (let i = fiocchi.length - 1; i >= 0; i--) {
+    const f = fiocchi[i];
     f.y += f.v;
+
     ctx.fillStyle = "white";
     ctx.beginPath();
     ctx.arc(f.x, f.y, f.r, 0, Math.PI*2);
     ctx.fill();
+
     if (f.y > canvas.height) fiocchi.splice(i,1);
-  });
+  }
 
   requestAnimationFrame(gameLoop);
 }
 
-/* ===== COUNTDOWN ===== */
-function startCountdown(callback) {
+/* ============================================
+   COUNTDOWN + START
+============================================ */
+function startCountdown(cb) {
   const c = document.getElementById("countdown");
   const num = document.getElementById("countdown-number");
 
@@ -480,25 +493,21 @@ function startCountdown(callback) {
   c.style.display = "flex";
   num.textContent = n;
 
-  const interval = setInterval(()=>{
+  const timer = setInterval(()=>{
     n--;
     if (n > 0) {
       num.textContent = n;
-      num.classList.remove("countdown-number");
-      void num.offsetWidth;
-      num.classList.add("countdown-number");
     } else {
       num.textContent = "VIA!";
       setTimeout(()=>{
+        clearInterval(timer);
         c.style.display = "none";
-        clearInterval(interval);
-        callback();
-      },600);
+        cb();
+      },500);
     }
   },1000);
 }
 
-/* ===== START GAME ===== */
 function iniziaGioco() {
   canvas.style.display = "block";
   document.getElementById("punteggio").style.display = "block";
@@ -515,7 +524,7 @@ document.getElementById("btn-start").addEventListener("click", ()=>{
   startCountdown(iniziaGioco);
 });
 
-/* TOP 10 */
+/* CLASSIFICA */
 document.getElementById("btn-top10").addEventListener("click", ()=>{
   document.getElementById("start-screen").style.display = "none";
   document.getElementById("fine").style.display = "flex";
