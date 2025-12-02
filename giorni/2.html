@@ -36,7 +36,7 @@ canvas {
   touch-action: none;
 }
 
-/* PUNTEGGIO */
+/* Punteggio */
 #punteggio {
   display: none;
   margin-top: 10px;
@@ -177,10 +177,11 @@ th, td {
   <div class="start-box">
     <p>
       🌲 Evita gli alberi<br>
-      🎁 Raccogli regali normali (+10)<br>
-      ⭐ Trova i regali d’oro (+50)<br>
-      ❤️ Hai 3 vite!<br>
+      🎁 Regali comuni (+10)<br>
+      ⭐ Regali d’oro (+50)<br>
+      ❤️ 3 vite<br>
       🦌 Tieni premuto per salire<br>
+      ❄ Neve che cade<br>
       📱 Perfetto per telefono!
     </p>
     <button id="btn-start" class="start-btn">▶️ INIZIA</button>
@@ -253,7 +254,6 @@ const giftGoldImg = new Image(); giftGoldImg.src = "../img/gift_gold.png";
 const VELOCITA_OSTACOLI = 2;
 const VELOCITA_REGALI = 2;
 const VELOCITA_GRAVITA = 0.55;
-const SALTO_FORZA = -15;
 
 let renna = {
   x: 40,
@@ -285,12 +285,13 @@ window.addEventListener("keyup", e => {
 });
 
 /* ===== GENERA OSTACOLI DISTANZIATI ===== */
-let ultimoOstacoloX = 0;
-function generaOstacolo() {
-  const distanzaMinima = canvas.width * 0.8;
-  const adesso = canvas.width + 20;
+let ultimoSpawn = Date.now();
 
-  if (adesso - ultimoOstacoloX < distanzaMinima) return;
+function generaOstacolo() {
+  const ora = Date.now();
+  const distanzaMinimaTempo = 1800; // minimo 1.8s tra un ostacolo e l’altro
+
+  if (ora - ultimoSpawn < distanzaMinimaTempo) return;
 
   ostacoli.push({
     x: canvas.width + 20,
@@ -299,11 +300,11 @@ function generaOstacolo() {
     h: 90
   });
 
-  ultimoOstacoloX = canvas.width + 20;
+  ultimoSpawn = ora;
 }
-setInterval(generaOstacolo, 2700);
+setInterval(generaOstacolo, 50);
 
-/* ===== GENERA REGALI (NORMALE + SPECIALI) ===== */
+/* ===== GENERA REGALI ===== */
 function generaRegalo() {
   const speciale = Math.random() < 0.10;
 
@@ -381,11 +382,11 @@ function gameLoop() {
 
   ctx.clearRect(0,0,canvas.width,canvas.height);
 
-  /* Movimento verticale */
+  /* Movimento verticale (jetpack) */
   if (pulsantePremuto) {
-    renna.vy = -5.2;
+    renna.vy = -5.2;     // salita costante
   } else {
-    renna.vy += VELOCITA_GRAVITA;
+    renna.vy += VELOCITA_GRAVITA; // gravità
   }
 
   renna.y += renna.vy;
@@ -406,11 +407,12 @@ function gameLoop() {
 
   ctx.drawImage(rennaImg, renna.x, renna.y, renna.w, renna.h);
 
-  /* OSTACOLI */
+  /* ALBERI */
   ostacoli.forEach((o,i)=>{
     o.x -= VELOCITA_OSTACOLI;
     ctx.drawImage(alberoImg, o.x, o.y, o.w, o.h);
 
+    // collisione
     if (
       renna.x + 20 < o.x + o.w &&
       renna.x + renna.w - 20 > o.x &&
@@ -423,6 +425,9 @@ function gameLoop() {
       if (vite <= 0) {
         fineGioco();
       }
+
+      document.getElementById("punteggio").textContent =
+        `Punteggio: ${punteggioTotale} | ❤️ ${vite}`;
     }
 
     if (o.x + o.w < 0) ostacoli.splice(i,1);
@@ -525,4 +530,3 @@ document.getElementById("retry-btn").addEventListener("click", ()=>{
 
 </body>
 </html>
-
