@@ -1,161 +1,196 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>🎅 Giorno 1 – Babbo Natale raccogli i regali!</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🎄 Giorno 2 – Reindeer Runner</title>
 
-  <!-- FONT -->
-  <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
 
-  <!-- FIREBASE -->
-  <script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-database-compat.js"></script>
+<!-- FIREBASE -->
+<script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-database-compat.js"></script>
 
-  <style>
-    body {
-      margin: 0;
-      background-color: #7b0412;
-      font-family: 'Ubuntu', sans-serif;
-      color: #fff;
-      text-align: center;
-      overflow-x: hidden;
-    }
+<style>
+body {
+  margin: 0;
+  background-color: #7b0412;
+  font-family: 'Ubuntu', sans-serif;
+  color: white;
+  text-align: center;
+  overflow-x: hidden;
+}
 
-    h1 { color: #ffd700; margin-top: 10px; }
+h1 {
+  color: #ffd700;
+  margin-top: 10px;
+}
 
-    canvas {
-      display: none;
-      margin: 20px auto 0;
-      background: url("../img/gioco1_sfondo.png") center/cover no-repeat;
-      border: 3px solid #f5d97c;
-      border-radius: 10px;
-      touch-action: none;
-    }
+/* CANVAS 4:5 */
+canvas {
+  display: none;
+  margin: 20px auto;
+  border: 3px solid #ffd700;
+  border-radius: 10px;
+  background: url("../img/sfondo_bosco.jpg") center center / cover no-repeat;
+  touch-action: none;
+}
 
-    .info {
-      display: none;
-      position: fixed;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: rgba(0, 0, 0, 0.4);
-      padding: 8px 16px;
-      border-radius: 12px;
-      border: 1px solid #f5d97c;
-      font-size: 1.1em;
-      z-index: 30;
-    }
+#punteggio {
+  display: none;
+  margin-top: 10px;
+  padding: 6px 14px;
+  background: rgba(0,0,0,0.5);
+  border-radius: 12px;
+  border: 1px solid #ffd700;
+  width: fit-content;
+  margin-left: auto;
+  margin-right: auto;
+}
 
-    /* POPUP FINALE */
-    #fine {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background: rgba(0,0,0,0.65);
-      backdrop-filter: blur(4px);
-      z-index: 9999;
-      display: none;
-      justify-content: center;
-      align-items: center;
-    }
+/* START SCREEN */
+#start-screen {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.60);
+  backdrop-filter: blur(5px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9998;
+}
 
-    .classifica-box {
-      background: #fffaf2;
-      padding: 25px;
-      border-radius: 20px;
-      width: 90%;
-      max-width: 450px;
-      border: 2px solid #ffd700;
-      color: #400000;
-      animation: popup .4s ease-out;
-    }
+.start-box {
+  background: #fffaf2;
+  padding: 30px;
+  border-radius: 20px;
+  width: 90%;
+  max-width: 420px;
+  border: 2px solid #ffd700;
+  color: #400000;
+  text-align: center;
+}
 
-    @keyframes popup {
-      from { transform: scale(.7); opacity: 0; }
-      to   { transform: scale(1); opacity: 1; }
-    }
+.start-btn {
+  width: 80%;
+  margin-top: 12px;
+  padding: 14px;
+  border-radius: 30px;
+  font-size: 1.1em;
+  cursor: pointer;
+  background: #7b0412;
+  color: white;
+  border: none;
+  font-weight: bold;
+}
+.start-btn:hover {
+  background: #ffd700;
+  color: #400000;
+}
 
-    .btn {
-      display: inline-block;
-      margin-top: 15px;
-      padding: 12px 30px;
-      border-radius: 30px;
-      font-weight: bold;
-      text-decoration: none;
-      cursor: pointer;
-      color: #fff;
-      background: #7b0412;
-      transition: .3s;
-    }
-    .btn:hover { background: #ffd700; color: #000; }
+/* COUNTDOWN */
+#countdown {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.55);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
 
-    /* MENU INIZIALE */
-    #start-screen {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background: rgba(0,0,0,0.60);
-      backdrop-filter: blur(4px);
-      z-index: 9998;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
+.countdown-number {
+  font-size: 6rem;
+  font-weight: bold;
+  color: #ffd700;
+  text-shadow: 0 0 20px black;
+  animation: zoomFade 1s ease forwards;
+}
 
-    .start-box {
-      background: #fffaf2;
-      padding: 30px;
-      border-radius: 20px;
-      width: 90%;
-      max-width: 420px;
-      border: 2px solid #ffd700;
-      color: #400000;
-      text-align: center;
-    }
+@keyframes zoomFade {
+  0% { opacity: 0; transform: scale(0.4); }
+  30% { opacity: 1; transform: scale(1); }
+  100% { opacity: 0; transform: scale(2); }
+}
 
-    .start-btn {
-      width: 80%;
-      margin: 10px auto;
-      padding: 14px;
-      border-radius: 30px;
-      font-size: 1.1em;
-      cursor: pointer;
-      background: #7b0412;
-      color: white;
-      border: none;
-    }
-    .start-btn:hover { background: #ffd700; color: #000; }
+/* FINE GIOCO */
+#fine {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.65);
+  backdrop-filter: blur(4px);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
 
-    table { width: 100%; margin-top: 15px; }
-    th, td { padding: 8px; text-align: center; border-bottom: 1px solid #d7bb5f; }
-  </style>
+.classifica-box {
+  background: #fffaf2;
+  padding: 25px;
+  border-radius: 20px;
+  width: 90%;
+  max-width: 460px;
+  border: 2px solid #ffd700;
+  color: #400000;
+  text-align: center;
+}
+
+.btn {
+  display: inline-block;
+  margin-top: 15px;
+  padding: 12px 30px;
+  border-radius: 30px;
+  font-weight: bold;
+  cursor: pointer;
+  color: white;
+  background: #7b0412;
+  text-decoration: none;
+}
+.btn:hover {
+  background: #ffd700;
+  color: #400000;
+}
+
+table { width: 100%; margin-top: 15px; }
+th, td {
+  padding: 8px;
+  border-bottom: 1px solid #d7bb5f;
+  text-align: center;
+}
+</style>
 </head>
 
 <body>
 
-<h1>🎅 Giorno 1 – Babbo Natale raccogli i regali!</h1>
+<h1>🎄 Giorno 2 – Reindeer Runner</h1>
+<div id="punteggio">Punteggio: 0</div>
 
-<!-- MENU INIZIALE -->
 <div id="start-screen">
   <div class="start-box">
-    <h2>🎄 Inizia il Gioco!</h2>
-    <p>Muovi Babbo Natale a destra e sinistra <br>
-       e raccogli più regali possibile evitando le bombe.</p>
-
-    <button id="btn-start" class="start-btn">▶️ INIZIA GIOCO</button>
-    <button id="btn-top10" class="start-btn" style="background:#b8860b;">🏆 CLASSIFICA GLOBALE</button>
+    <p>
+      🌲 Evita gli alberi<br>
+      🎁 Prendi i regali (+10 punti)<br>
+      🦌 Premi per saltare<br>
+      📱 Funziona perfettamente su telefono
+    </p>
+    <button id="btn-start" class="start-btn">▶️ INIZIA</button>
+    <button id="btn-top10" class="start-btn" style="background:#b8860b;">🏆 CLASSIFICA</button>
   </div>
 </div>
 
-<canvas id="game"></canvas>
-<div class="info" id="info">🎁 Punteggio: 0 | ⏱️ 60s</div>
+<div id="countdown">
+  <div id="countdown-number" class="countdown-number">3</div>
+</div>
 
-<!-- POPUP CLASSIFICA -->
+<canvas id="game"></canvas>
+
 <div id="fine">
   <div class="classifica-box">
     <h2 id="messaggio"></h2>
-
     <h3>🏆 Top 10 Globale</h3>
     <table id="score-table">
       <tr><th>Nome</th><th>Punti</th></tr>
@@ -166,274 +201,236 @@
   </div>
 </div>
 
+<audio id="musica" loop>
+  <source src="../audio/jingle_bells_instrumental.mp3" type="audio/mpeg">
+</audio>
+
 <script>
-/* =======================================================
-   🔥 FIREBASE CONFIG
-======================================================= */
+/* ===== FIREBASE ===== */
 firebase.initializeApp({
   apiKey: "AIzaSyBrI1yThI6zmnYwKE4OHbS8vhrUPrMsnsk",
   authDomain: "calendarioroccasicura.firebaseapp.com",
   databaseURL: "https://calendarioroccasicura-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId: "calendarioroccasicura",
-  storageBucket: "calendarioroccasicura.appspot.com",
-  messagingSenderId: "38731898044",
-  appId: "1:38731898044:web:e89bcfae7c64239fec44b9"
+  projectId: "calendarioroccasicura"
 });
 const db = firebase.database();
 
-/* =======================================================
-   🎭 NOME MASCHERATO
-======================================================= */
+/* ===== NOME MASCHERATO ===== */
 const nomeReale = localStorage.getItem("utente") || "Ospite";
-const nomeMascherato =
-  nomeReale[0] + Math.floor(Math.random()*900+100) + nomeReale.slice(1);
+const nomeMascherato = nomeReale[0] + Math.floor(Math.random()*900+100) + nomeReale.slice(1);
 
-/* =======================================================
-   🎮 CANVAS CONFIG
-======================================================= */
+/* ===== CANVAS ===== */
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 
 function resizeCanvas() {
-  if (window.innerWidth < 700) {
-    canvas.width = window.innerWidth - 20;
-    canvas.height = window.innerHeight * 0.55;
-  } else {
-    canvas.width = 900;
-    canvas.height = 500;
-  }
+  const w = Math.min(window.innerWidth - 20, 450);
+  const h = Math.floor(w * 1.25);
+  canvas.width = w;
+  canvas.height = h;
 }
 resizeCanvas();
 window.addEventListener("resize", resizeCanvas);
 
-/* =======================================================
-   🎅 SANTA
-======================================================= */
-const santa = {
-  x: 100,
-  y: canvas.height - 120,
-  w: 70, h: 90,
-  vy: 0,
-  jumping: false,
-  speed: 12
-};
+/* ===== IMMAGINI ===== */
+const rennaImg = new Image(); rennaImg.src = "../img/renna.png";
+const alberoImg = new Image(); alberoImg.src = "../img/albero.png";
+const giftImg = new Image(); giftImg.src = "../img/gift.png";
 
-const santaImg = new Image();
-santaImg.src = "../img/babbo.png";
+/* ===== OGGETTI ===== */
+let renna = { x: 40, y: 300, w: 70, h: 70, vy: 0, jumping: false };
+let ostacoli = [];
+let regali = [];
+let punteggioTotale = 0;
+let giocoTerminato = false;
 
-/* OGGETTI */
-const giftImg = new Image();
-giftImg.src = "../img/gift.png";
-const bombImg = new Image();
-bombImg.src = "../img/bomba.png";
-
-let objects = [];
-const keys = {};
-
-/* TASTI */
-document.addEventListener("keydown", e => keys[e.key] = true);
-document.addEventListener("keyup", e => keys[e.key] = false);
-document.addEventListener("keydown", e => {
-  if (e.code === "Space" || e.code === "ArrowUp") {
-    e.preventDefault();
-    jump();
-  }
-});
-
-/* TOUCH + MOUSE */
-canvas.addEventListener("mousedown", jump);
-canvas.addEventListener("touchstart", jump);
-canvas.addEventListener("mousemove", e => {
-  if (e.buttons > 0) {
-    const r = canvas.getBoundingClientRect();
-    santa.x = e.clientX - r.left - santa.w/2;
-  }
-});
-canvas.addEventListener("touchmove", e => {
-  e.preventDefault();
-  const r = canvas.getBoundingClientRect();
-  santa.x = e.touches[0].clientX - r.left - santa.w/2;
-}, { passive:false });
-
-/* SALTO */
+/* ===== SALTO ===== */
 function jump() {
-  if (!santa.jumping) {
-    santa.vy = -15;
-    santa.jumping = true;
+  if (!renna.jumping) {
+    renna.vy = -14;
+    renna.jumping = true;
   }
 }
+canvas.addEventListener("touchstart", e => { e.preventDefault(); jump(); });
+canvas.addEventListener("mousedown", jump);
+window.addEventListener("keydown", e => {
+  if (["Space","ArrowUp"].includes(e.code)) jump();
+});
 
-/* TIMER */
-let score = 0;
-let timeLeft = 60;
-
-function updateTimer() {
-  const interval = setInterval(() => {
-    timeLeft--;
-    if (timeLeft <= 0) {
-      clearInterval(interval);
-      endGame();
-    }
-  }, 1000);
-}
-
-/* SPAWN OGGETTI */
-function spawnObject() {
-  const isBomb = Math.random() < 0.25;
-  const obj = {
-    x: Math.random()*(canvas.width - 40),
-    y: canvas.height - 160 - Math.random()*100,
-    size: 40,
-    type: isBomb ? "bomb" : "gift",
-    fade: false
-  };
-  objects.push(obj);
-
-  setTimeout(() => {
-    obj.fade = true;
-    setTimeout(() => objects = objects.filter(o => o !== obj), 300);
-  }, 2000);
-}
-
-let spawnInterval = null;
-
-/* MOVIMENTO */
-function moveSanta() {
-  if (keys["ArrowLeft"]) santa.x -= santa.speed;
-  if (keys["ArrowRight"]) santa.x += santa.speed;
-
-  santa.y += santa.vy;
-  santa.vy += 0.6;
-
-  if (santa.y > canvas.height - 120) {
-    santa.y = canvas.height - 120;
-    santa.vy = 0;
-    santa.jumping = false;
-  }
-
-  if (santa.x < 0) santa.x = 0;
-  if (santa.x + santa.w > canvas.width) santa.x = canvas.width - santa.w;
-}
-
-/* COLLISIONI */
-function checkCollisions() {
-  objects.forEach(o => {
-    if (santa.x < o.x + o.size &&
-        santa.x + santa.w > o.x &&
-        santa.y < o.y + o.size &&
-        santa.y + santa.h > o.y) {
-
-      objects = objects.filter(x => x !== o);
-      if (o.type === "gift") score += 10;
-      else score -= 5;
-    }
+/* ===== GENERA OSTACOLI ===== */
+function generaOstacolo() {
+  ostacoli.push({
+    x: canvas.width + 20,
+    y: canvas.height - 150,   /* più giù */
+    w: 60,
+    h: 90
   });
 }
+setInterval(generaOstacolo, 2000);
 
-/* DISEGNO */
-function draw() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  ctx.drawImage(santaImg, santa.x, santa.y, santa.w, santa.h);
-
-  objects.forEach(o => {
-    ctx.globalAlpha = o.fade ? 0.5 : 1;
-    ctx.drawImage(o.type === "gift" ? giftImg : bombImg, o.x, o.y, o.size, o.size);
-    ctx.globalAlpha = 1;
+/* ===== GENERA REGALI ===== */
+function generaRegalo() {
+  regali.push({
+    x: canvas.width + 20,
+    y: canvas.height - 220,  /* più su: NON sopra l'albero */
+    w: 45,
+    h: 45
   });
-
-  document.getElementById("info").textContent =
-    `🎁 ${nomeMascherato} | Punti: ${score} | ⏱️ ${timeLeft}s`;
 }
+setInterval(generaRegalo, 3000);
 
-/* GAME LOOP */
-function gameLoop() {
-  moveSanta();
-  checkCollisions();
-  draw();
-  if (timeLeft > 0) requestAnimationFrame(gameLoop);
-}
+/* ===== FINE GIOCO ===== */
+function fineGioco() {
+  if (giocoTerminato) return;
+  giocoTerminato = true;
 
-/* FINE GIOCO */
-function endGame() {
-  canvas.style.display = "none";
-  document.getElementById("info").style.display = "none";
   document.getElementById("fine").style.display = "flex";
-
   document.getElementById("messaggio").textContent =
-    `🎉 Bravo ${nomeMascherato}! Hai totalizzato ${score} punti!`;
+    `Hai raccolto ${punteggioTotale} punti!`;
 
-  salvaOnline(nomeMascherato, score);
-}
-
-/* 📡 SALVATAGGIO GLOBALE */
-function salvaOnline(nome, punti) {
-  const ref = db.ref("punteggi/giorno1").push();
-  ref.set({
-    nome,
-    punti: Number(punti),   // <<< CORRETTO
+  db.ref("punteggi/giorno2").push({
+    nome: nomeMascherato,
+    punti: punteggioTotale,
     timestamp: Date.now()
-  }).then(() => caricaClassifica());
+  });
+
+  caricaClassifica();
 }
 
-/* 📡 CARICA TOP 10 */
+/* ===== CLASSIFICA ===== */
 function caricaClassifica() {
   const table = document.getElementById("score-table");
   table.innerHTML = "<tr><th>Nome</th><th>Punti</th></tr>";
 
-  db.ref("punteggi/giorno1")
-    .orderByChild("punti")
-    .limitToLast(10)
-    .once("value", snap => {
-      
-      let list = [];
-      snap.forEach(child => {
-        const val = child.val();
-        list.push({
-          nome: val.nome,
-          punti: Number(val.punti)
-        });
-      });
+  db.ref("punteggi/giorno2").once("value").then(snap=>{
+    let arr = [];
+    snap.forEach(s => arr.push(s.val()));
+    arr.sort((a,b)=>b.punti-a.punti);
+    arr = arr.slice(0,10);
 
-      list.sort((a,b) => b.punti - a.punti);
-
-      list.forEach(row => {
-        const tr = document.createElement("tr");
-        tr.innerHTML = `<td>${row.nome}</td><td>${row.punti}</td>`;
-        table.appendChild(tr);
-      });
+    arr.forEach(r=>{
+      table.innerHTML += `<tr><td>${r.nome}</td><td>${r.punti}</td></tr>`;
     });
+  });
 }
 
-/* LOGICA AVVIO */
-document.getElementById("btn-start").addEventListener("click", () => {
+/* ===== GAME LOOP ===== */
+function gameLoop() {
+  if (giocoTerminato) return;
+
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+
+  /* gravità */
+  renna.y += renna.vy;
+  renna.vy += 0.8;
+
+  const terreno = canvas.height - 150;
+  if (renna.y > terreno) {
+    renna.y = terreno;
+    renna.vy = 0;
+    renna.jumping = false;
+  }
+
+  ctx.drawImage(rennaImg, renna.x, renna.y, renna.w, renna.h);
+
+  /* ALBERI */
+  ostacoli.forEach((o,i)=>{
+    o.x -= 3;
+    ctx.drawImage(alberoImg, o.x, o.y - 20, o.w, o.h);
+
+    if (
+      renna.x < o.x+o.w &&
+      renna.x+renna.w > o.x &&
+      renna.y < o.y+o.h &&
+      renna.y+renna.h > o.y
+    ) fineGioco();
+
+    if (o.x+o.w < 0) ostacoli.splice(i,1);
+  });
+
+  /* REGALI */
+  regali.forEach((g,i)=>{
+    g.x -= 3;
+    ctx.drawImage(giftImg, g.x, g.y, g.w, g.h);
+
+    if (
+      renna.x < g.x+g.w &&
+      renna.x+renna.w > g.x &&
+      renna.y < g.y+g.h &&
+      renna.y+renna.h > g.y
+    ) {
+      punteggioTotale += 10;
+      document.getElementById("punteggio").textContent =
+        `Punteggio: ${punteggioTotale}`;
+      regali.splice(i,1);
+    }
+
+    if (g.x + g.w < 0) regali.splice(i,1);
+  });
+
+  requestAnimationFrame(gameLoop);
+}
+
+/* ===== COUNTDOWN ===== */
+function startCountdown(callback) {
+  const c = document.getElementById("countdown");
+  const num = document.getElementById("countdown-number");
+
+  let n = 3;
+  c.style.display = "flex";
+  num.textContent = n;
+
+  const interval = setInterval(()=>{
+    n--;
+    if (n > 0) {
+      num.textContent = n;
+      num.classList.remove("countdown-number");
+      void num.offsetWidth;
+      num.classList.add("countdown-number");
+    } else {
+      num.textContent = "VIA!";
+      setTimeout(()=>{
+        c.style.display = "none";
+        clearInterval(interval);
+        callback();
+      },600);
+    }
+  },1000);
+}
+
+/* ===== AVVIO GIOCO ===== */
+function iniziaGioco() {
+  canvas.style.display = "block";
+  document.getElementById("punteggio").style.display = "block";
+  gameLoop();
+}
+
+/* ===== START BUTTON ===== */
+document.getElementById("btn-start").addEventListener("click", ()=>{
   document.getElementById("start-screen").style.display = "none";
 
-  canvas.style.display = "block";
-  document.getElementById("info").style.display = "block";
+  const musica = document.getElementById("musica");
+  musica.currentTime = 0;
+  musica.play().catch(()=>{});
 
-  spawnInterval = setInterval(spawnObject, 1300);
-
-  updateTimer();
-  gameLoop();
+  startCountdown(iniziaGioco);
 });
 
-document.getElementById("btn-top10").addEventListener("click", () => {
+document.getElementById("btn-top10").addEventListener("click", ()=>{
   document.getElementById("start-screen").style.display = "none";
   document.getElementById("fine").style.display = "flex";
   caricaClassifica();
 });
 
 /* RIPROVA */
-document.getElementById("retry-btn").addEventListener("click", () => location.reload());
+document.getElementById("retry-btn").addEventListener("click", ()=>{
+  location.reload();
+});
 </script>
-
-<!-- COUNTER DEV -->
-<script src="https://cdn.counter.dev/script.js"
-data-id="9d666b79-dc20-433b-8015-ac699700813e"
-data-utcoffset="1"></script>
-
 </body>
 </html>
+
+
 
 
 
