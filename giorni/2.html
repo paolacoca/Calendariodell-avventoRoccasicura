@@ -2,7 +2,7 @@
 <html lang="it">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, maximum-scale=1.0">
 <title>🎄 Giorno 2 – Reindeer Runner</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
@@ -36,6 +36,7 @@ canvas {
   touch-action: none;
 }
 
+/* Punteggio */
 #punteggio {
   display: none;
   margin-top: 10px;
@@ -169,28 +170,33 @@ th, td {
 <h1>🎄 Giorno 2 – Reindeer Runner</h1>
 <div id="punteggio">Punteggio: 0</div>
 
+<!-- START SCREEN -->
 <div id="start-screen">
   <div class="start-box">
     <p>
       🌲 Evita gli alberi<br>
       🎁 Prendi i regali (+10 punti)<br>
       🦌 Premi per saltare<br>
-      📱 Funziona al 100% su telefono
+      📱 Perfetto per telefono!
     </p>
     <button id="btn-start" class="start-btn">▶️ INIZIA</button>
     <button id="btn-top10" class="start-btn" style="background:#b8860b;">🏆 CLASSIFICA</button>
   </div>
 </div>
 
+<!-- COUNTDOWN -->
 <div id="countdown">
   <div id="countdown-number" class="countdown-number">3</div>
 </div>
 
+<!-- GAME -->
 <canvas id="game"></canvas>
 
+<!-- FINE -->
 <div id="fine">
   <div class="classifica-box">
     <h2 id="messaggio"></h2>
+
     <h3>🏆 Top 10 Globale</h3>
     <table id="score-table">
       <tr><th>Nome</th><th>Punti</th></tr>
@@ -206,7 +212,7 @@ th, td {
 </audio>
 
 <script>
-/* ===== FIREBASE CONFIG ===== */
+/* ===== FIREBASE ===== */
 firebase.initializeApp({
   apiKey: "AIzaSyBrI1yThI6zmnYwKE4OHbS8vhrUPrMsnsk",
   authDomain: "calendarioroccasicura.firebaseapp.com",
@@ -215,9 +221,10 @@ firebase.initializeApp({
 });
 const db = firebase.database();
 
-/* ===== USER NAME MASK ===== */
+/* ===== USER MASK ===== */
 const nomeReale = localStorage.getItem("utente") || "Ospite";
-const nomeMascherato = nomeReale[0] + Math.floor(Math.random()*900+100) + nomeReale.slice(1);
+const nomeMascherato =
+  nomeReale[0] + Math.floor(Math.random()*900+100) + nomeReale.slice(1);
 
 /* ===== CANVAS ===== */
 const canvas = document.getElementById("game");
@@ -237,8 +244,24 @@ const rennaImg = new Image(); rennaImg.src = "../img/renna.png";
 const alberoImg = new Image(); alberoImg.src = "../img/albero.png";
 const giftImg = new Image(); giftImg.src = "../img/gift.png";
 
+/* ===== PARAMETRI DIFFICOLTÀ ===== */
+const VELOCITA_OSTACOLI = 2;
+const VELOCITA_REGALI = 2;
+const VELOCITA_GRAVITA = 0.55;
+const SALTO_FORZA = -15;
+const SPAWN_OSTACOLI_MS = 2600;
+const SPAWN_REGALI_MS = 1800;
+
 /* ===== OGGETTI ===== */
-let renna = { x: 40, y: 300, w: 70, h: 70, vy: 0, jumping: false };
+let renna = {
+  x: 40,
+  y: 0,
+  w: 80,
+  h: 80,
+  vy: 0,
+  jumping: false
+};
+
 let ostacoli = [];
 let regali = [];
 let punteggioTotale = 0;
@@ -247,48 +270,47 @@ let giocoTerminato = false;
 /* ===== SALTO ===== */
 function jump() {
   if (!renna.jumping) {
-    renna.vy = -14;
+    renna.vy = SALTO_FORZA;
     renna.jumping = true;
   }
 }
 
 canvas.addEventListener("touchstart", e => { e.preventDefault(); jump(); });
 canvas.addEventListener("mousedown", () => jump());
-
 window.addEventListener("keydown", e => {
   if (["Space", "ArrowUp"].includes(e.code)) jump();
 });
 
-/* ===== GENERA ALBERI LENTI ===== */
+/* ===== GENERA OSTACOLI ===== */
 function generaOstacolo() {
   ostacoli.push({
     x: canvas.width + 20,
-    y: canvas.height - 120,
+    y: canvas.height - 140,
     w: 60,
     h: 90
   });
 }
-setInterval(generaOstacolo, 2000);
+setInterval(generaOstacolo, SPAWN_OSTACOLI_MS);
 
 /* ===== GENERA REGALI ===== */
 function generaRegalo() {
   regali.push({
     x: canvas.width + 20,
-    y: canvas.height - 140,
+    y: canvas.height - (160 + Math.random()*50),
     w: 45,
     h: 45
   });
 }
-setInterval(generaRegalo, 3000);
+setInterval(generaRegalo, SPAWN_REGALI_MS);
 
-/* ===== FINE GIOCO ===== */
+/* ===== FINE ===== */
 function fineGioco() {
   if (giocoTerminato) return;
   giocoTerminato = true;
 
   document.getElementById("fine").style.display = "flex";
   document.getElementById("messaggio").textContent =
-    `Hai raccolto ${punteggioTotale} punti!`;
+    `Hai totalizzato ${punteggioTotale} punti!`;
 
   db.ref("punteggi/giorno2").push({
     nome: nomeMascherato,
@@ -308,7 +330,7 @@ function caricaClassifica() {
     .once("value")
     .then(snap => {
       let arr = [];
-      snap.forEach(s => arr.push(s.val()));
+      snap.forEach(s=>arr.push(s.val()));
       arr.sort((a,b)=>b.punti-a.punti);
       arr = arr.slice(0,10);
 
@@ -326,7 +348,7 @@ function gameLoop() {
 
   /* Gravità */
   renna.y += renna.vy;
-  renna.vy += 0.8;
+  renna.vy += VELOCITA_GRAVITA;
 
   const terreno = canvas.height - 150;
   if (renna.y > terreno) {
@@ -339,14 +361,15 @@ function gameLoop() {
 
   /* ALBERI */
   ostacoli.forEach((o,i)=>{
-    o.x -= 3;
-    ctx.drawImage(alberoImg, o.x, o.y - 20, o.w, o.h);
+    o.x -= VELOCITA_OSTACOLI;
+    ctx.drawImage(alberoImg, o.x, o.y, o.w, o.h);
 
+    // Hitbox più permissiva
     if (
-      renna.x < o.x + o.w &&
-      renna.x + renna.w > o.x &&
-      renna.y < o.y + o.h &&
-      renna.y + renna.h > o.y
+      renna.x + 20 < o.x + o.w &&
+      renna.x + renna.w - 20 > o.x &&
+      renna.y + 20 < o.y + o.h &&
+      renna.y + renna.h - 20 > o.y
     ) fineGioco();
 
     if (o.x + o.w < 0) ostacoli.splice(i,1);
@@ -354,7 +377,7 @@ function gameLoop() {
 
   /* REGALI */
   regali.forEach((g,i)=>{
-    g.x -= 3;
+    g.x -= VELOCITA_REGALI;
     ctx.drawImage(giftImg, g.x, g.y, g.w, g.h);
 
     if (
@@ -402,14 +425,13 @@ function startCountdown(callback) {
   },1000);
 }
 
-/* ===== AVVIO GIOCO ===== */
+/* ===== START GAME ===== */
 function iniziaGioco() {
   canvas.style.display = "block";
   document.getElementById("punteggio").style.display = "block";
   gameLoop();
 }
 
-/* ===== START BUTTON ===== */
 document.getElementById("btn-start").addEventListener("click", ()=>{
   document.getElementById("start-screen").style.display = "none";
 
