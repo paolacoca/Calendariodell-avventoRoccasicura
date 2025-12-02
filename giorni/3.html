@@ -1,1 +1,345 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, maximum-scale=1.0, user-scalable=no">
+    <title>🎄 Giorno 3 – Snowman Escape</title>
+
+    <!-- FONT -->
+    <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
+
+<style>
+/* --------------------------
+   STILE PAGINA
+-------------------------- */
+body {
+    margin: 0;
+    padding: 0;
+    background: #7b0412;
+    color: white;
+    font-family: 'Ubuntu', sans-serif;
+    text-align: center;
+}
+
+.titolo-gioco {
+    font-size: 26px;
+    margin-top: 10px;
+    color: #ffd700;
+}
+
+/* CANVAS CON CORNICE LEGGERA */
+.canvas-container {
+    width: 360px;
+    height: 640px;
+    margin: 0 auto;
+    border: 2px solid rgba(255, 215, 0, 0.4);
+    border-radius: 10px;
+}
+
+canvas {
+    width: 360px;
+    height: 640px;
+    display: block;
+    background: #bde0fe;
+}
+
+/* BOTTONI */
+.controls {
+    margin-top: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.btn-spara {
+    background: #ffd700;
+    color: #7b0412;
+    font-size: 22px;
+    font-weight: bold;
+    border: 3px solid #fff3b0;
+    border-radius: 14px;
+    padding: 12px 20px;
+    width: 85%;
+    margin: 0 auto;
+    cursor: pointer;
+}
+
+.btn-regalo {
+    background: #ffffff;
+    color: #7b0412;
+    font-size: 20px;
+    font-weight: bold;
+    border: 3px solid #ffd700;
+    border-radius: 14px;
+    padding: 10px 20px;
+    width: 85%;
+    margin: 0 auto;
+    cursor: pointer;
+    opacity: 0.4;
+}
+
+.btn-regalo.enabled {
+    opacity: 1;
+}
+
+.hud {
+    margin-top: 12px;
+    font-size: 20px;
+    display: flex;
+    justify-content: space-around;
+}
+</style>
+</head>
+
+<body>
+
+<h1 class="titolo-gioco">🎄 Giorno 3 – Snowman Escape</h1>
+
+<div class="canvas-container">
+    <canvas id="gameCanvas" width="360" height="640"></canvas>
+</div>
+
+<div class="controls">
+    <button id="btnSpara" class="btn-spara">SPARA!</button>
+    <button id="btnRegalo" class="btn-regalo" disabled>PRENDI IL REGALO!</button>
+</div>
+
+<div class="hud">
+    <span id="score">Punteggio: 0</span>
+    <span id="lives">❤️❤️❤️</span>
+</div>
+
+<script>
+/* =========================================
+   🎄 SNOWMAN ESCAPE – CODICE COMPLETO
+========================================= */
+
+const canvas = document.getElementById("gameCanvas");
+const ctx = canvas.getContext("2d");
+
+const W = canvas.width;
+const H = canvas.height;
+
+const btnSpara = document.getElementById("btnSpara");
+const btnRegalo = document.getElementById("btnRegalo");
+const scoreElement = document.getElementById("score");
+const livesElement = document.getElementById("lives");
+
+/* IMMAGINI */
+const imgBabbo = new Image();
+imgBabbo.src = "./img/babbo_3.png";
+
+const imgSnowman = new Image();
+imgSnowman.src = "./img/snowman.png";
+
+const imgGift = new Image();
+imgGift.src = "./img/gift.png";
+
+const projectileImgs = [
+    new Image(),
+    new Image(),
+    new Image()
+];
+projectileImgs[0].src = "./img/b1.png";
+projectileImgs[1].src = "./img/b2.png";
+projectileImgs[2].src = "./img/b3.png";
+
+/* --------------------- VARIABILI --------------------- */
+let running = true;
+
+let babbo = {
+    x: 40,
+    y: H/2,
+    w: 80,
+    h: 80,
+    vy: 0
+};
+
+let snowmen = [];
+let gifts = [];
+let projectiles = [];
+
+let reteAttiva = false;
+let reteTimer = 0;
+
+let score = 0;
+let lives = 3;
+
+/* ------------------ MOVIMENTO TOUCH ------------------ */
+let touching = false;
+
+canvas.addEventListener("touchstart", () => touching = true);
+canvas.addEventListener("touchend", () => touching = false);
+canvas.addEventListener("mousedown", () => touching = true);
+canvas.addEventListener("mouseup", () => touching = false);
+
+function moveBabbo() {
+    babbo.vy = touching ? -3.5 : 3.5;
+    babbo.y += babbo.vy;
+
+    if (babbo.y < 0) babbo.y = 0;
+    if (babbo.y + babbo.h > H) babbo.y = H - babbo.h;
+}
+
+/* ------------------ CREA OGGETTI ------------------ */
+function spawnSnowman() {
+    snowmen.push({
+        x: W + 50,
+        y: Math.random() * (H - 100),
+        w: 90,
+        h: 90,
+        speed: 2
+    });
+}
+
+function spawnGift() {
+    gifts.push({
+        x: W + 50,
+        y: Math.random() * (H - 100),
+        w: 60,
+        h: 60,
+        speed: 2
+    });
+}
+
+/* ------------------ BOTTONI ------------------ */
+btnSpara.addEventListener("click", () => {
+    const img = projectileImgs[Math.floor(Math.random()*projectileImgs.length)];
+    projectiles.push({
+        x: babbo.x + babbo.w,
+        y: babbo.y + babbo.h/2 - 15,
+        w: 40,
+        h: 40,
+        speed: 6,
+        img: img
+    });
+});
+
+btnRegalo.addEventListener("click", () => {
+    if (!reteAttiva) return;
+    reteTimer = 60; 
+});
+
+/* ------------------ COLLISION ------------------ */
+function rectCollision(a,b){
+    return (
+        a.x < b.x + b.w &&
+        a.x + a.w > b.x &&
+        a.y < b.y + b.h &&
+        a.y + a.h > b.y
+    );
+}
+
+/* ------------------ GAME LOOP ------------------ */
+let snowTimer = 0;
+let giftTimer = 0;
+
+function update() {
+    if (!running) return;
+
+    ctx.clearRect(0,0,W,H);
+
+    moveBabbo();
+    ctx.drawImage(imgBabbo, babbo.x, babbo.y, babbo.w, babbo.h);
+
+    /* ----- Snowmen ----- */
+    snowTimer++;
+    if (snowTimer > 80) {
+        spawnSnowman();
+        snowTimer = 0;
+    }
+
+    snowmen.forEach((s, si) => {
+        s.x -= s.speed;
+        ctx.drawImage(imgSnowman, s.x, s.y, s.w, s.h);
+
+        if (rectCollision(babbo, s)) {
+            lives--;
+            livesElement.textContent = "❤️".repeat(lives) + "🖤".repeat(3-lives);
+            snowmen.splice(si,1);
+            if (lives <= 0) return gameOver();
+        }
+
+        if (reteTimer > 0) {
+            const reteArea = { 
+                x: babbo.x + babbo.w + 10, 
+                y: babbo.y, 
+                w: 120, 
+                h: babbo.h 
+            };
+            ctx.strokeStyle = "rgba(255,255,255,0.6)";
+            ctx.strokeRect(reteArea.x, reteArea.y, reteArea.w, reteArea.h);
+
+            if (rectCollision(reteArea, s)) {
+                score -= 30;
+                if (score < 0) score = 0;
+                snowmen.splice(si,1);
+                scoreElement.textContent = "Punteggio: "+score;
+            }
+        }
+    });
+
+    if (reteTimer > 0) {
+        reteTimer--;
+        if (reteTimer == 0) {
+            reteAttiva = false;
+            btnRegalo.disabled = true;
+            btnRegalo.classList.remove("enabled");
+        }
+    }
+
+    /* ----- Regali ----- */
+    giftTimer++;
+    if (giftTimer > 200) {
+        spawnGift();
+        giftTimer = 0;
+    }
+
+    gifts.forEach((g, gi) => {
+        g.x -= g.speed;
+        ctx.drawImage(imgGift, g.x, g.y, g.w, g.h);
+
+        if (rectCollision(babbo,g)) {
+            gifts.splice(gi,1);
+            reteAttiva = true;
+            btnRegalo.disabled = false;
+            btnRegalo.classList.add("enabled");
+        }
+    });
+
+    /* ----- Proiettili ----- */
+    projectiles.forEach((p, pi) => {
+        p.x += p.speed;
+        ctx.drawImage(p.img, p.x, p.y, p.w, p.h);
+
+        if (p.x > W) projectiles.splice(pi,1);
+
+        snowmen.forEach((s, si) => {
+            if (rectCollision(p,s)) {
+                score += 50;
+                scoreElement.textContent = "Punteggio: "+score;
+                snowmen.splice(si,1);
+                projectiles.splice(pi,1);
+            }
+        });
+    });
+
+    requestAnimationFrame(update);
+}
+
+/* ------------------ GAME OVER ------------------ */
+function gameOver(){
+    running = false;
+    ctx.fillStyle = "rgba(0,0,0,0.6)";
+    ctx.fillRect(0,0,W,H);
+    ctx.fillStyle = "white";
+    ctx.font = "32px Ubuntu";
+    ctx.fillText("GAME OVER", W/2-90, H/2);
+}
+
+update();
+</script>
+
+</body>
+</html>
 
