@@ -1,10 +1,11 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="it">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>🎄 Giorno 2 – Reindeer Runner</title>
 
+<!-- FONT -->
 <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
 
 <!-- FIREBASE -->
@@ -12,14 +13,27 @@
 <script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-database-compat.js"></script>
 
 <style>
+/* ================================================================
+   🎨 STILI GENERALI DELLA PAGINA
+   ================================================================= */
 body {
   margin: 0;
   background-color: #7b0412;
   font-family: 'Ubuntu', sans-serif;
   color: white;
   text-align: center;
+  overflow-x: hidden;
 }
 
+h1 {
+  color: #ffd700;
+  margin-top: 10px;
+}
+
+/* ================================================================
+   🖼️ CANVAS DI GIOCO
+   Lo sfondo è centrato e si adatta anche in verticale.
+   ================================================================= */
 canvas {
   display: none;
   margin: 20px auto;
@@ -29,22 +43,26 @@ canvas {
   touch-action: none;
 }
 
-h1 { color: #ffd700; margin-top: 10px; }
-
+/* ================================================================
+   📍 INFO DISTANZA
+   ================================================================= */
 .info {
   display: none;
   position: fixed;
   bottom: 20px;
   left: 50%;
   transform: translateX(-50%);
-  background: rgba(0,0,0,0.5);
+  background: rgba(0,0,0,0.50);
   padding: 8px 16px;
-  border: 1px solid #ffd700;
   border-radius: 12px;
+  border: 1px solid #ffd700;
   z-index: 30;
 }
 
-#start-screen, #fine {
+/* ================================================================
+   ▶️ SCHERMATA INIZIALE
+   ================================================================= */
+#start-screen {
   position: fixed;
   top: 0; left: 0;
   width: 100%; height: 100%;
@@ -56,21 +74,67 @@ h1 { color: #ffd700; margin-top: 10px; }
   z-index: 9999;
 }
 
-#fine { display: none; }
-
-.start-box, .classifica-box {
+.start-box {
   background: #fffaf2;
-  color: #400000;
-  padding: 25px;
+  padding: 30px;
   border-radius: 20px;
-  border: 2px solid #ffd700;
   width: 90%;
-  max-width: 430px;
+  max-width: 420px;
+  border: 2px solid #ffd700;
+  color: #400000;
   text-align: center;
 }
 
-.start-btn, .btn {
+.start-btn {
+  width: 80%;
   margin-top: 10px;
+  padding: 13px;
+  border-radius: 30px;
+  font-size: 1.1em;
+  cursor: pointer;
+  background: #7b0412;
+  color: white;
+  border: none;
+  font-weight: bold;
+}
+.start-btn:hover {
+  background: #ffd700;
+  color: black;
+}
+
+/* ================================================================
+   🏁 FINE GIOCO / CLASSIFICA
+   ================================================================= */
+#fine {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.60);
+  backdrop-filter: blur(5px);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.classifica-box {
+  background: #fffaf2;
+  padding: 25px;
+  border-radius: 20px;
+  width: 90%;
+  max-width: 430px;
+  border: 2px solid #ffd700;
+  color: #400000;
+  animation: popup .4s ease-out;
+}
+
+@keyframes popup {
+  from { transform: scale(.7); opacity: 0; }
+  to   { transform: scale(1); opacity: 1; }
+}
+
+.btn {
+  margin-top: 15px;
   padding: 14px;
   width: 80%;
   border-radius: 30px;
@@ -79,15 +143,17 @@ h1 { color: #ffd700; margin-top: 10px; }
   font-weight: bold;
   background: #7b0412;
   color: white;
+  display: inline-block;
+  text-decoration: none;
 }
-
-.start-btn:hover, .btn:hover {
+.btn:hover {
   background: #ffd700;
   color: black;
 }
 
 table { width: 100%; margin-top: 15px; }
 th, td { padding: 8px; border-bottom: 1px solid #d7bb5f; text-align: center; }
+
 </style>
 </head>
 
@@ -95,41 +161,50 @@ th, td { padding: 8px; border-bottom: 1px solid #d7bb5f; text-align: center; }
 
 <h1>🎄 Giorno 2 – Reindeer Runner</h1>
 
-<!-- START SCREEN -->
+<!-- ================================================================
+     ▶️ START SCREEN
+     ================================================================= -->
 <div id="start-screen">
   <div class="start-box">
     <p>
       🌲 Evita gli alberi<br>
       🦌 Premi per saltare<br>
-      ✨ Salto lungo fino a 15 secondi<br>
-      ☁ Nuvola dopo 10s reali
+      ✨ Salto lungo fino a 15 secondi reali<br>
+      ☁ Nuvola dopo 10s di volo continuo
     </p>
     <button id="btn-start" class="start-btn">▶️ INIZIA</button>
     <button id="btn-top10" class="start-btn" style="background:#b8860b;">🏆 CLASSIFICA</button>
   </div>
 </div>
 
-<!-- GIOCO -->
+<!-- CANVAS -->
 <canvas id="game"></canvas>
 <div class="info" id="info">Distanza: 0m</div>
 
-<!-- FINE GIOCO -->
+<!-- ================================================================
+     🏁 SCHERMATA FINALE
+     ================================================================= -->
 <div id="fine">
   <div class="classifica-box">
     <h2 id="messaggio"></h2>
     <h3>🏆 Top 10</h3>
-    <table id="score-table"><tr><th>Nome</th><th>Punti</th></tr></table>
+    <table id="score-table">
+      <tr><th>Nome</th><th>Punti</th></tr>
+    </table>
     <button id="retry-btn" class="btn">🔄 Riprova</button>
     <a href="../calendario.html" class="btn">⬅ Calendario</a>
   </div>
 </div>
 
+<!-- AUDIO -->
 <audio id="musica" loop>
   <source src="../audio/jingle_bells_instrumental.mp3" type="audio/mpeg">
 </audio>
 
 <script>
-// FIREBASE
+/* ================================================================
+   🔥 FIREBASE CONFIG
+   ================================================================= */
 firebase.initializeApp({
   apiKey: "AIzaSyBrI1yThI6zmnYwKE4OHbS8vhrUPrMsnsk",
   authDomain: "calendarioroccasicura.firebaseapp.com",
@@ -138,11 +213,16 @@ firebase.initializeApp({
 });
 const db = firebase.database();
 
-// USERNAME
+/* ================================================================
+   👤 NOME MASCHERATO
+   ================================================================= */
 const nomeReale = localStorage.getItem("utente") || "Ospite";
-const nomeMascherato = nomeReale[0] + Math.floor(Math.random()*900+100) + nomeReale.slice(1);
+const nomeMascherato =
+  nomeReale[0] + Math.floor(Math.random()*900+100) + nomeReale.slice(1);
 
-// CANVAS
+/* ================================================================
+   🖼️ CANVAS RESPONSIVE
+   ================================================================= */
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 
@@ -156,34 +236,40 @@ function resizeCanvas() {
   }
 }
 
-// IMMAGINI
-const rennaImg = new Image();
-rennaImg.src = "../img/renna.png";
+/* ================================================================
+   🖼️ SPRITES
+   ================================================================= */
+const rennaImg = new Image(); rennaImg.src = "../img/renna.png";
+const alberoImg = new Image(); alberoImg.src = "../img/albero.png";
+const cloudImg  = new Image(); cloudImg.src  = "../img/cloud.png";
 
-const alberoImg = new Image();
-alberoImg.src = "../img/albero.png";
+/* ================================================================
+   🎮 VARIABILI DI GIOCO
+   ================================================================= */
+let renna = {
+  x: 120,
+  y: 300,
+  w: 110,
+  h: 110,
+  vy: 0,
+  jumping: false
+};
 
-const cloudImg = new Image();
-cloudImg.src = "../img/cloud.png";
-
-// VARIABILI DI GIOCO
-let renna = { x: 120, y: 300, w: 110, h: 110, vy: 0, jumping: false };
 let ostacoli = [];
 let distanza = 0;
 let giocoTerminato = false;
 
-// salto lungo + timer reale
 let saltoLungo = false;
 let tempoVoloReale = 0;
 
-// nuvola
 let nuvola = null;
 let nuvolaAttiva = false;
 
-// stop alberi
 let stopAlberi = false;
 
-// INPUT
+/* ================================================================
+   🎮 INPUT
+   ================================================================= */
 function jump() {
   if (!renna.jumping) {
     renna.vy = -16;
@@ -192,25 +278,36 @@ function jump() {
   }
 }
 
-// tastiera
 window.addEventListener("keydown", e => {
   if (["Space", "ArrowUp"].includes(e.code)) {
     saltoLungo = true;
     jump();
   }
 });
+
 window.addEventListener("keyup", () => saltoLungo = false);
 
-// touch + mouse
 canvas.addEventListener("mousedown", () => { saltoLungo = true; jump(); });
 canvas.addEventListener("mouseup", () => saltoLungo = false);
-canvas.addEventListener("touchstart", e => { e.preventDefault(); saltoLungo = true; jump(); });
+
+canvas.addEventListener("touchstart", e => {
+  e.preventDefault();
+  saltoLungo = true;
+  jump();
+});
 canvas.addEventListener("touchend", () => saltoLungo = false);
 
-// OSTACOLI
+/* ================================================================
+   🌲 OSTACOLI
+   ================================================================= */
 function generaOstacolo() {
   if (stopAlberi || nuvolaAttiva) return;
-  ostacoli.push({ x: canvas.width + 20, y: canvas.height - 120, w: 70, h: 100 });
+  ostacoli.push({
+    x: canvas.width + 20,
+    y: canvas.height - 120,
+    w: 70,
+    h: 100
+  });
 }
 
 function gestisciOstacoli() {
@@ -219,20 +316,23 @@ function gestisciOstacoli() {
   if (ultimo.x < canvas.width - 650) generaOstacolo();
 }
 
-// NUVOLA DA DESTRA → SINISTRA
+/* ================================================================
+   ☁️ NUVOLA DA DESTRA → SINISTRA
+   ================================================================= */
 function generaNuvola() {
   nuvola = {
     x: canvas.width + 50,
     y: canvas.height * 0.15,
-    w: 140,
-    h: 100,
+    w: 120,
+    h: 85,
     speed: 4
   };
 
   nuvolaAttiva = true;
   stopAlberi = true;
 
-  setTimeout(() => { stopAlberi = false; }, 5000);
+  // dopo 5 secondi riprendono gli alberi
+  setTimeout(() => stopAlberi = false, 5000);
 }
 
 function disegnaNuvola() {
@@ -241,21 +341,25 @@ function disegnaNuvola() {
   nuvola.x -= nuvola.speed;
   ctx.drawImage(cloudImg, nuvola.x, nuvola.y, nuvola.w, nuvola.h);
 
-  if (renna.x < nuvola.x + nuvola.w &&
-      renna.x + renna.w > nuvola.x &&
-      renna.y < nuvola.y + nuvola.h &&
-      renna.y + renna.h > nuvola.y) {
+  // collisione nuvola → game over
+  if (
+    renna.x < nuvola.x + nuvola.w &&
+    renna.x + renna.w > nuvola.x &&
+    renna.y < nuvola.y + nuvola.h &&
+    renna.y + renna.h > nuvola.y
+  ) {
     fineGioco();
   }
 
-  if (nuvola.x + nuvola.w < 0) {
-    nuvolaAttiva = false;
-  }
+  if (nuvola.x + nuvola.w < 0) nuvolaAttiva = false;
 }
 
-// FINE GIOCO
+/* ================================================================
+   💥 FINE GIOCO
+   ================================================================= */
 function fineGioco() {
   giocoTerminato = true;
+
   document.getElementById("fine").style.display = "flex";
   document.getElementById("messaggio").textContent =
     `Hai percorso ${Math.floor(distanza)} metri!`;
@@ -268,12 +372,15 @@ function fineGioco() {
   caricaClassifica();
 }
 
-// CLASSIFICA
+/* ================================================================
+   🏆 CLASSIFICA
+   ================================================================= */
 function caricaClassifica() {
   db.ref("giorno2")
     .orderByChild("punti")
     .limitToLast(10)
     .once("value", snap => {
+
       const table = document.getElementById("score-table");
       table.innerHTML = "<tr><th>Nome</th><th>Punti</th></tr>";
 
@@ -285,13 +392,18 @@ function caricaClassifica() {
     });
 }
 
-// GAME LOOP
+/* ================================================================
+   🔁 GAME LOOP
+   ================================================================= */
 function gameLoop() {
+
   if (giocoTerminato) return;
 
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  // tempo reale di volo
+  /* ------------------------------------------
+     ⏱ SALTO LUNGO: tempo reale di volo
+     ------------------------------------------ */
   if (renna.jumping && !nuvolaAttiva) {
     tempoVoloReale += 1/60;
 
@@ -300,41 +412,57 @@ function gameLoop() {
     }
   }
 
-  // nuvola dopo 10s
+  // NUVOLE DOPO 10s REALI
   if (!nuvolaAttiva && tempoVoloReale >= 10) {
     generaNuvola();
   }
 
-  // gravità
+  /* ------------------------------------------
+     🧲 GRAVITÀ
+     ------------------------------------------ */
   renna.y += renna.vy;
   renna.vy += 0.8;
 
-  // tetto → solo limite fisico
+  /* ------------------------------------------
+     🔼 LIMITE TETTO — SOLO LIMITE FISICO
+     ------------------------------------------ */
   const limiteAlto = canvas.height * 0.05;
+
   if (renna.y < limiteAlto) {
     renna.y = limiteAlto;
-    renna.vy = 1;
+    renna.vy = 1;     // non blocca il salto
+    renna.jumping = true; // mantiene il timer attivo
   }
 
-  // terreno
+  /* ------------------------------------------
+     🔽 TERRA
+     ------------------------------------------ */
   const terreno = canvas.height - 150;
+
   if (renna.y > terreno) {
     renna.y = terreno;
     renna.vy = 0;
     renna.jumping = false;
-    tempoVoloReale = 0;
+    tempoVoloReale = 0;  // reset solo a terra
     nuvolaAttiva = false;
   }
 
-  // disegna renna
+  /* ------------------------------------------
+     🦌 DISEGNA RENNA
+     ------------------------------------------ */
   ctx.drawImage(rennaImg, renna.x, renna.y, renna.w, renna.h);
 
-  // nuvola
+  /* ------------------------------------------
+     ☁️ DISEGNA NUVOLA
+     ------------------------------------------ */
   disegnaNuvola();
 
-  // ostacoli
+  /* ------------------------------------------
+     🌲 OSTACOLI
+     ------------------------------------------ */
   gestisciOstacoli();
   ostacoli.forEach((o, i) => {
+
     o.x -= 6;
     ctx.drawImage(alberoImg, o.x, o.y - 30, o.w, o.h);
 
@@ -350,6 +478,9 @@ function gameLoop() {
     if (o.x + o.w < 0) ostacoli.splice(i, 1);
   });
 
+  /* ------------------------------------------
+     📏 DISTANZA
+     ------------------------------------------ */
   distanza += 0.3;
   document.getElementById("info").textContent =
     `Distanza: ${Math.floor(distanza)}m`;
@@ -357,15 +488,26 @@ function gameLoop() {
   requestAnimationFrame(gameLoop);
 }
 
-// BOTTONI
+/* ================================================================
+   ▶️ PULSANTI
+   ================================================================= */
 document.getElementById("btn-start").onclick = () => {
+
   document.getElementById("start-screen").style.display = "none";
 
   canvas.style.display = "block";
   resizeCanvas();
   document.getElementById("info").style.display = "block";
 
-  document.getElementById("musica").play();
+  /* MUSICA */
+  const musica = document.getElementById("musica");
+  musica.currentTime = 0;
+
+  musica.play().catch(() => {
+    canvas.addEventListener("touchstart", () => musica.play(), { once:true });
+    canvas.addEventListener("mousedown", () => musica.play(), { once:true });
+  });
+
   gameLoop();
 };
 
@@ -376,6 +518,7 @@ document.getElementById("btn-top10").onclick = () => {
 };
 
 document.getElementById("retry-btn").onclick = () => location.reload();
+
 </script>
 
 </body>
