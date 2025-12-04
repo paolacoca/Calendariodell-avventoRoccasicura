@@ -138,7 +138,7 @@ th, td {
 
 <h1>⭐ Giorno 5 – Stella Furiosa PRO</h1>
 
-<!-- START -->
+<!-- START SCREEN -->
 <div id="start-screen">
   <div class="start-box">
     <h2>✨ Tocca la Stella Furiosa! ✨</h2>
@@ -147,7 +147,9 @@ th, td {
       ❄️ Evita il ghiaccio (perdi 1 vita)<br>
       ☄️ Il meteorite fa impazzire la traiettoria<br><br>
       ❤️ Hai 3 vite<br>
-      ⏳ 30 secondi
+      ⏳ 30 secondi<br><br>
+      🌟 Aumenta la difficoltà:<br>
+      1 stella → 2 stelle → 4 stelle!
     </p>
     <button id="btn-start" class="start-btn">▶️ INIZIA</button>
     <button id="btn-top10" class="start-btn" style="background:#b8860b;">🏆 CLASSIFICA</button>
@@ -157,7 +159,7 @@ th, td {
 <canvas id="game"></canvas>
 <div id="info"></div>
 
-<!-- FINE -->
+<!-- END SCREEN -->
 <div id="fine">
   <div class="classifica-box">
     <h2 id="fine-msg"></h2>
@@ -171,6 +173,10 @@ th, td {
     <a href="../calendario.html" class="btn">⬅ Torna al Calendario</a>
   </div>
 </div>
+
+
+
+
 
 <script>
 /* =========================================================
@@ -231,17 +237,37 @@ meteorImg.src = "../img/meteorite.png";
    GAME OBJECTS
 ========================================================= */
 
-let star = {
-  x: 150,
-  y: 150,
-  size: 60,
-  vx: 3,
-  vy: 2,
-  trail: []
-};
+/* STELLE MULTIPLE */
+let stars = [
+  {
+    x: 150,
+    y: 150,
+    size: 60,
+    vx: 3,
+    vy: 2,
+    trail: []
+  }
+];
 
+/* funzioni per aggiungere stelle */
+function spawnStar() {
+  stars.push({
+    x: Math.random() * (canvas.width - 60),
+    y: Math.random() * (canvas.height - 60),
+    size: 60,
+    vx: (Math.random()*4 - 2),
+    vy: (Math.random()*4 - 2),
+    trail: []
+  });
+}
+
+/* ghiaccio */
 let ices = [];
+
+/* meteorite */
 let meteor = null;
+
+/* particelle */
 let particles = [];
 
 /* HUD */
@@ -257,8 +283,8 @@ function createParticles(x, y, color) {
   for (let i=0; i<10; i++) {
     particles.push({
       x, y,
-      vx: (Math.random()*4 -2),
-      vy: (Math.random()*4 -2),
+      vx: (Math.random()*4 - 2),
+      vy: (Math.random()*4 - 2),
       alpha: 1,
       color
     });
@@ -266,18 +292,20 @@ function createParticles(x, y, color) {
 }
 
 /* =========================================================
-   STELLA
+   MOVIMENTO STELLE
 ========================================================= */
-function updateStar() {
-  star.x += star.vx;
-  star.y += star.vy;
+function updateStars() {
+  stars.forEach(s => {
+    s.x += s.vx;
+    s.y += s.vy;
 
-  if (star.x < 0 || star.x+star.size > canvas.width) star.vx *= -1;
-  if (star.y < 0 || star.y+star.size > canvas.height) star.vy *= -1;
+    if (s.x < 0 || s.x + s.size > canvas.width) s.vx *= -1;
+    if (s.y < 0 || s.y + s.size > canvas.height) s.vy *= -1;
 
-  /* SCIA NEON */
-  star.trail.push({ x: star.x+30, y: star.y+30, alpha: 1 });
-  if (star.trail.length > 15) star.trail.shift();
+    /* scia neon */
+    s.trail.push({ x: s.x + 30, y: s.y + 30, alpha: 1 });
+    if (s.trail.length > 15) s.trail.shift();
+  });
 }
 
 /* =========================================================
@@ -313,17 +341,19 @@ function updateMeteor() {
 
   meteor.x += meteor.vx;
 
-  /* collisione con stella = deviazione */
-  if (
-    meteor.x < star.x + star.size &&
-    meteor.x + meteor.size > star.x &&
-    meteor.y < star.y + star.size &&
-    meteor.y + meteor.size > star.y
-  ) {
-    star.vx = (Math.random()*6 - 3);
-    star.vy = (Math.random()*6 - 3);
-    createParticles(star.x, star.y, "#ffa726");
-  }
+  /* collisione meteorite-stella → deviazione */
+  stars.forEach(s => {
+    if (
+      meteor.x < s.x + s.size &&
+      meteor.x + meteor.size > s.x &&
+      meteor.y < s.y + s.size &&
+      meteor.y + meteor.size > s.y
+    ) {
+      s.vx = (Math.random()*6 - 3);
+      s.vy = (Math.random()*6 - 3);
+      createParticles(s.x, s.y, "#ffa726");
+    }
+  });
 
   if (meteor.x < -70) meteor = null;
 }
@@ -332,22 +362,25 @@ function updateMeteor() {
    COLLISIONI
 ========================================================= */
 function checkCollisions() {
-  /* ghiaccio */
+
+  /* ghiaccio → toglie 1 vita */
   ices.forEach(i => {
     if (i.hit) return;
 
-    if (
-      star.x < i.x + i.size &&
-      star.x + star.size > i.x &&
-      star.y < i.y + i.size &&
-      star.y + star.size > i.y
-    ) {
-      i.hit = true;
-      lives--;
-      createParticles(i.x, i.y, "#b3e5fc");
+    stars.forEach(s => {
+      if (
+        s.x < i.x + i.size &&
+        s.x + s.size > i.x &&
+        s.y < i.y + i.size &&
+        s.y + s.size > i.y
+      ) {
+        i.hit = true;
+        lives--;
+        createParticles(i.x, i.y, "#b3e5fc");
 
-      if (lives <= 0) endGame();
-    }
+        if (lives <= 0) endGame();
+      }
+    });
   });
 }
 
@@ -358,20 +391,26 @@ function draw() {
   ctx.clearRect(0,0,canvas.width,canvas.height);
 
   /* meteorite */
-  if (meteor) ctx.drawImage(meteorImg, meteor.x, meteor.y, meteor.size, meteor.size);
+  if (meteor) {
+    ctx.drawImage(meteorImg, meteor.x, meteor.y, meteor.size, meteor.size);
+  }
 
-  /* scia neon */
-  star.trail.forEach(t => {
-    ctx.globalAlpha = t.alpha;
-    ctx.fillStyle = "#fff67a";
-    ctx.beginPath();
-    ctx.arc(t.x, t.y, 8, 0, Math.PI*2);
-    ctx.fill();
-    ctx.globalAlpha = 1;
+  /* scia neon per tutte le stelle */
+  stars.forEach(s => {
+    s.trail.forEach(t => {
+      ctx.globalAlpha = t.alpha;
+      ctx.fillStyle = "#fff67a";
+      ctx.beginPath();
+      ctx.arc(t.x, t.y, 8, 0, Math.PI*2);
+      ctx.fill();
+      ctx.globalAlpha = 1;
+    });
   });
 
-  /* stella */
-  ctx.drawImage(starImg, star.x, star.y, star.size, star.size);
+  /* stelle */
+  stars.forEach(s => {
+    ctx.drawImage(starImg, s.x, s.y, s.size, s.size);
+  });
 
   /* ghiaccio */
   ices.forEach(i => {
@@ -392,14 +431,14 @@ function draw() {
 }
 
 /* =========================================================
-   UPDATE
+   UPDATE LOOP
 ========================================================= */
 function update() {
-  updateStar();
+  updateStars();
   updateMeteor();
   checkCollisions();
 
-  /* particelle update */
+  /* particles update */
   particles.forEach(p => {
     p.x += p.vx;
     p.y += p.vy;
@@ -413,41 +452,60 @@ function update() {
 }
 
 /* =========================================================
-   CLICK STELLA – MOUSE + TOUCH
+   CLICK STELLA (mouse + touch)
 ========================================================= */
 canvas.addEventListener("click", e => {
   const rect = canvas.getBoundingClientRect();
   const mx = e.clientX - rect.left;
   const my = e.clientY - rect.top;
 
-  if (
-    mx >= star.x &&
-    mx <= star.x + star.size &&
-    my >= star.y &&
-    my <= star.y + star.size
-  ) {
-    score += 5;
-    createParticles(star.x, star.y, "#fff176");
-  }
+  stars.forEach(s => {
+    if (
+      mx >= s.x &&
+      mx <= s.x + s.size &&
+      my >= s.y &&
+      my <= s.y + s.size
+    ) {
+      score += 5;
+      createParticles(s.x, s.y, "#fff176");
+    }
+  });
 });
 
 /* =========================================================
-   TIMER
+   TIMER CON AUMENTO DIFFICOLTÀ
 ========================================================= */
 function startTimer() {
   const t = setInterval(() => {
     if (!playing) return clearInterval(t);
 
     timeLeft--;
+
+    /* AUMENTO DIFFICOLTÀ */
+    if (timeLeft === 20 && stars.length < 2) {
+      spawnStar();
+    }
+
+    if (timeLeft === 10 && stars.length < 4) {
+      spawnStar();
+      spawnStar();
+      spawnStar();
+    }
+
     if (timeLeft <= 0) {
       clearInterval(t);
       endGame();
     }
   },1000);
 }
+</script>
 
+
+
+
+<script>
 /* =========================================================
-   START
+   START GAME
 ========================================================= */
 document.getElementById("btn-start").onclick = () => {
   document.getElementById("start-screen").style.display = "none";
@@ -460,12 +518,26 @@ document.getElementById("btn-start").onclick = () => {
   startTimer();
   update();
 
-  setInterval(spawnIce, 1200);
-  setInterval(() => { if (Math.random()<0.4) spawnMeteor(); }, 2500);
+  /* ghiaccio ogni 1.2s */
+  setInterval(() => {
+    if (playing) spawnIce();
+  }, 1200);
+
+  /* meteorite ogni ~2.5s */
+  setInterval(() => {
+    if (playing && Math.random() < 0.4) spawnMeteor();
+  }, 2500);
+};
+
+/* CLASSIFICA DIRETTA (dal menu iniziale) */
+document.getElementById("btn-top10").onclick = () => {
+  document.getElementById("start-screen").style.display = "none";
+  document.getElementById("fine").style.display = "flex";
+  loadTop10();
 };
 
 /* =========================================================
-   CLASSIFICA
+   SALVATAGGIO PUNTEGGIO
 ========================================================= */
 function saveScore() {
   db.ref("punteggi/giorno5").push({
@@ -475,6 +547,9 @@ function saveScore() {
   }).then(loadTop10);
 }
 
+/* =========================================================
+   CARICA TOP 10
+========================================================= */
 function loadTop10() {
   const table = document.getElementById("score-table");
   table.innerHTML = "<tr><th>Nome</th><th>Punti</th></tr>";
@@ -482,9 +557,9 @@ function loadTop10() {
   db.ref("punteggi/giorno5")
     .orderByChild("punti")
     .limitToLast(10)
-    .once("value", s => {
+    .once("value", snap => {
       let arr = [];
-      s.forEach(c => arr.push(c.val()));
+      snap.forEach(c => arr.push(c.val()));
       arr.sort((a,b)=> b.punti - a.punti);
 
       arr.forEach(r => {
@@ -496,10 +571,11 @@ function loadTop10() {
 }
 
 /* =========================================================
-   END
+   FINE PARTITA
 ========================================================= */
 function endGame() {
   playing = false;
+
   canvas.style.display = "none";
   document.getElementById("info").style.display = "none";
 
@@ -511,14 +587,10 @@ function endGame() {
   saveScore();
 }
 
-/* CLASSIFICA DIRETTA */
-document.getElementById("btn-top10").onclick = () => {
-  document.getElementById("start-screen").style.display = "none";
-  document.getElementById("fine").style.display = "flex";
-  loadTop10();
+/* Riprova */
+document.getElementById("retry-btn").onclick = () => {
+  location.reload();
 };
-
-document.getElementById("retry-btn").onclick = () => location.reload();
 </script>
 
 </body>
