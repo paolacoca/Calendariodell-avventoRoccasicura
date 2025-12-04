@@ -7,7 +7,6 @@
 
 <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
 
-<!-- FIREBASE -->
 <script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-database-compat.js"></script>
 
@@ -165,7 +164,6 @@ th, td {
 <canvas id="game"></canvas>
 <div id="info"></div>
 
-<!-- POPUP FINALE IDENTICO AL GIORNO 1 -->
 <div id="fine">
   <div class="classifica-box">
 
@@ -198,8 +196,14 @@ firebase.initializeApp({
 const db = firebase.database();
 
 /* NOME MASCHERATO */
+// 'real' è il nome utente reale
 const real = localStorage.getItem("utente") || "Ospite";
+// 'user' è il nome mascherato usato nel gioco
 const user = real[0] + Math.floor(Math.random()*900+100) + real.slice(1);
+
+/* VARIABILI PER GLI INTERVALS (NUOVO) */
+let iceInterval, meteorInterval; 
+
 
 /* CANVAS SETUP */
 const canvas = document.getElementById("game");
@@ -304,23 +308,32 @@ function updateMeteor(){
   if(meteor.x < -80) meteor = null;
 }
 
-/* CLICK HANDLING */
+/* CLICK HANDLING (LOGICA MODIFICATA PER EVITARE DOPPIA INTERAZIONE) */
 canvas.addEventListener("click", e=>{
   const r = canvas.getBoundingClientRect();
   const mx = e.clientX - r.left;
   const my = e.clientY - r.top;
+  
+  let interactionHandled = false;
 
+  // 1. Priorità al Ghiaccio (se un ghiaccio viene toccato, si perde la vita e si ignora la stella)
+  for (let i = 0; i < ices.length; i++) {
+    const ice = ices[i];
+    if (mx >= ice.x && mx <= ice.x + ice.size && my >= ice.y && my <= ice.y + ice.size) {
+      lives--;
+      if (lives <= 0) endGame();
+      interactionHandled = true;
+      break; 
+    }
+  }
+
+  if (interactionHandled) return;
+
+  // 2. Stelle (solo se il ghiaccio non è stato toccato)
   stars.forEach(s=>{
     if(mx>=s.x && mx<=s.x+s.size && my>=s.y && my<=s.y+s.size){
       score += 5;
       createParticles(s.x,s.y,"#fff176");
-    }
-  });
-
-  ices.forEach(i=>{
-    if(mx>=i.x && mx<=i.x+i.size && my>=i.y && my<=i.y+i.size){
-      lives--;
-      if(lives <= 0) endGame();
     }
   });
 });
@@ -369,9 +382,10 @@ function update(){
 }
 
 /* TIMER */
+let mainTimer;
 function startTimer(){
-  const t = setInterval(()=>{
-    if(!playing) return clearInterval(t);
+  mainTimer = setInterval(()=>{
+    if(!playing) return clearInterval(mainTimer);
 
     timeLeft--;
 
@@ -379,7 +393,7 @@ function startTimer(){
     if(timeLeft === 10) stars.push({x:300,y:120,size:70,vx:4,vy:3,trail:[]});
 
     if(timeLeft <= 0){
-      clearInterval(t);
+      clearInterval(mainTimer);
       endGame();
     }
   },1000);
@@ -393,10 +407,12 @@ document.getElementById("btn-start").onclick = ()=>{
 
   playing = true;
   startTimer();
-  update();
+  
+  // Assegna gli intervalli alle variabili (NUOVO)
+  iceInterval = setInterval(()=>{ if(playing) spawnIce(); },1200);
+  meteorInterval = setInterval(()=>{ if(playing && Math.random() < 0.55) spawnMeteor(); },3000);
 
-  setInterval(()=>{ if(playing) spawnIce(); },1200);
-  setInterval(()=>{ if(playing && Math.random() < 0.55) spawnMeteor(); },3000);
+  update();
 };
 
 /* APRI CLASSIFICA */
@@ -406,30 +422,39 @@ document.getElementById("btn-top10").onclick = ()=>{
   loadTop10();
 };
 
-/* CARICA CLASSIFICA TOP 10 */
+/* CARICA CLASSIFICA TOP 10 (LETTURA DA classifica_max) */
 function loadTop10(){
   const table = document.getElementById("score-table");
   table.innerHTML = "<tr><th>Nome</th><th>Punti</th></tr>";
 
-  db.ref("punteggi/giorno5")
+  // Legge dalla nuova cartella classifica_max
+  db.ref("classifica_max/giorno5") 
     .orderByChild("punti")
     .limitToLast(10)
     .once("value", snap=>{
       let list = [];
       snap.forEach(child => list.push(child.val()));
+      // La classifica usa il nome REALE e non il mascherato
       list.sort((a,b)=> b.punti - a.punti);
 
       list.forEach(r=>{
         const tr = document.createElement("tr");
-        tr.innerHTML = `<td>${r.nome}</td><td>${r.punti}</td>`;
+        // Mostra il nome reale, o il nome mascherato se salvato
+        const nomeDisplay = r.nome_mascherato || r.nome; 
+        tr.innerHTML = `<td>${nomeDisplay}</td><td>${r.punti}</td>`;
         table.appendChild(tr);
       });
     });
 }
 
-/* GAME OVER */
+/* GAME OVER (LOGICA DI SALVATAGGIO MODIFICATA) */
 function endGame(){
   playing = false;
+  
+  // Ferma tutti gli setInterval attivi (NUOVO)
+  clearInterval(mainTimer);
+  clearInterval(iceInterval);
+  clearInterval(meteorInterval);
 
   canvas.style.display = "none";
   document.getElementById("info").style.display = "none";
@@ -438,20 +463,37 @@ function endGame(){
   document.getElementById("fine-msg").innerHTML =
     `⭐ Hai totalizzato <b>${score}</b> punti!`;
 
-  db.ref("punteggi/giorno5").push({
-    nome: user,
-    punti: Number(score),
-    timestamp: Date.now()
-  });
+  // --- LOGICA SALVATAGGIO CLASSIFICA ---
+  const userRef = db.ref("classifica_max/giorno5").child(real); 
 
-  loadTop10();
+  // 1. Controlla il punteggio massimo esistente per l'utente 'real'
+  userRef.once("value", snapshot => {
+    const record = snapshot.val();
+    const currentMaxScore = record ? record.punti : 0;
+
+    // 2. Salva solo se il punteggio attuale (score) è maggiore
+    if (score > currentMaxScore) {
+      userRef.set({
+        nome: real, // Chiave
+        punti: Number(score),
+        timestamp: Date.now(),
+        nome_mascherato: user // Salviamo anche il nome mascherato per la visualizzazione
+      }).then(() => {
+        // Se il salvataggio è avvenuto, ricarica la classifica
+        loadTop10(); 
+      });
+    } else {
+      // Se non è stato un record personale, mostra comunque la classifica
+      loadTop10();
+    }
+  });
+  // --- FINE LOGICA SALVATAGGIO ---
 }
 
 /* RIPROVA */
 document.getElementById("retry-btn").onclick = ()=> location.reload();
 </script>
 
-<!-- COUNTER -->
 <script src="https://cdn.counter.dev/script.js"
         data-id="9d666b79-dc20-433b-8015-ac699700813e"
         data-utcoffset="1"></script>
