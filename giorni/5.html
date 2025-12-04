@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>⭐ Giorno 5 – Stella Furiosa Winter Edition</title>
+<title>⭐ Giorno 5 – Stella Furiosa PRO</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
 
@@ -23,7 +23,6 @@ body {
   height: 100vh;
 }
 
-/* TITOLO */
 h1 {
   margin-top: 10px;
   color: #ffd700;
@@ -32,128 +31,124 @@ h1 {
 /* CANVAS */
 canvas {
   display: none;
-  margin: 0 auto;
-  background: linear-gradient(#91d4ff, #e0f7ff);
+  background: radial-gradient(circle, #d9f2ff, #9cd8ff);
   border: 3px solid #ffd700;
   border-radius: 15px;
+  margin: 0 auto;
   touch-action: none;
 }
 
-/* INFO */
+/* INFO BAR */
 #info {
   display: none;
   width: 100%;
   padding: 10px 0;
+  background: rgba(0,0,0,0.3);
+  border-top: 1px solid #ffd700;
   font-size: 1.2em;
-  background: rgba(0,0,0,0.35);
   position: fixed;
   bottom: 0;
   left: 0;
-  border-top: 1px solid #ffd700;
-  z-index: 40;
+  z-index: 50;
 }
 
 /* START SCREEN */
 #start-screen {
   position: fixed;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
+  top:0; left:0;
+  width:100%; height:100%;
   background: rgba(0,0,0,0.6);
   backdrop-filter: blur(4px);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 9998;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  z-index:9998;
 }
 
 .start-box {
-  background: #fffaf2;
-  width: 90%;
-  max-width: 420px;
-  padding: 25px;
-  border: 2px solid #ffd700;
-  border-radius: 20px;
-  color: #3a0000;
+  width:90%;
+  max-width:420px;
+  background:#fffaf2;
+  border:2px solid #ffd700;
+  padding:25px;
+  border-radius:20px;
+  color:#3a0000;
+  text-align:center;
 }
 
 .start-btn {
-  width: 80%;
-  padding: 14px;
-  margin-top: 10px;
-  font-size: 1.1em;
-  border: none;
-  border-radius: 30px;
-  background: #7b0412;
-  color: #fff;
+  width:80%;
+  padding:14px;
+  margin-top:10px;
+  font-size:1.1em;
+  border:none;
+  border-radius:30px;
+  background:#7b0412;
+  color:white;
 }
 .start-btn:hover {
-  background: #ffd700;
-  color: #000;
+  background:#ffd700;
+  color:#000;
 }
 
-/* POPUP FINE */
+/* END SCREEN */
 #fine {
   position: fixed;
   top:0; left:0;
-  width: 100%; height: 100%;
-  background: rgba(0,0,0,0.65);
-  display: none;
-  justify-content: center;
-  align-items: center;
-  z-index: 9999;
+  width:100%; height:100%;
+  background:rgba(0,0,0,0.6);
+  display:none;
+  justify-content:center;
+  align-items:center;
+  z-index:9999;
 }
 
 .classifica-box {
-  background: #fffaf2;
-  width: 90%;
-  max-width: 420px;
-  padding: 25px;
-  border-radius: 20px;
-  border: 2px solid #ffd700;
-  color: #3a0000;
+  width:90%;
+  max-width:420px;
+  background:#fffaf2;
+  color:#3a0000;
+  border:2px solid #ffd700;
+  border-radius:20px;
+  padding:25px;
 }
 
 .btn {
-  display: inline-block;
-  margin-top: 15px;
-  padding: 12px 30px;
-  border-radius: 30px;
-  background: #7b0412;
-  color: #fff;
+  margin-top:15px;
+  padding:12px 30px;
+  background:#7b0412;
+  border-radius:30px;
+  color:white;
+  cursor:pointer;
 }
-.btn:hover {
-  background: #ffd700;
-  color: #000;
-}
+.btn:hover { background:#ffd700; color:black; }
 
 table {
-  width: 100%;
-  margin-top: 10px;
+  width:100%;
+  margin-top:10px;
 }
 th, td {
-  padding: 8px;
-  border-bottom: 1px solid #d7bb5f;
-  text-align: center;
+  padding:8px;
+  border-bottom:1px solid #d7bb5f;
 }
 </style>
 </head>
 
 <body>
 
-<h1>⭐ Giorno 5 – Stella Furiosa Winter Edition</h1>
+<h1>⭐ Giorno 5 – Stella Furiosa PRO</h1>
 
-<!-- START SCREEN -->
+<!-- START -->
 <div id="start-screen">
   <div class="start-box">
     <h2>✨ Tocca la Stella Furiosa! ✨</h2>
     <p>
       ⭐ Tocca la stella per fare punti!<br>
-      ❄️ Evita i blocchi di ghiaccio – perdi una vita!<br>
-      ☄️ Il meteorite fa impazzire la traiettoria... 😱<br><br>
-      ❤️ Hai 3 vite!<br>
-      ⏳ Hai 30 secondi!
+      ❄️ Evita il ghiaccio (perdi 1 vita)<br>
+      ☄️ Il meteorite fa impazzire la traiettoria<br><br>
+      ❤️ Hai 3 vite<br>
+      ⏳ 30 secondi
     </p>
-
     <button id="btn-start" class="start-btn">▶️ INIZIA</button>
     <button id="btn-top10" class="start-btn" style="background:#b8860b;">🏆 CLASSIFICA</button>
   </div>
@@ -162,7 +157,7 @@ th, td {
 <canvas id="game"></canvas>
 <div id="info"></div>
 
-<!-- POPUP FINALE -->
+<!-- FINE -->
 <div id="fine">
   <div class="classifica-box">
     <h2 id="fine-msg"></h2>
@@ -173,14 +168,14 @@ th, td {
     </table>
 
     <button id="retry-btn" class="btn" style="background:#d41e1e;">🔄 Riprova</button>
-    <a href="../calendario.html" class="btn">⬅ Calendario</a>
+    <a href="../calendario.html" class="btn">⬅ Torna al Calendario</a>
   </div>
 </div>
 
 <script>
-/* ================================
+/* =========================================================
    FIREBASE
-================================ */
+========================================================= */
 firebase.initializeApp({
   apiKey: "AIzaSyBrI1yThI6zmnYwKE4OHbS8vhrUPrMsnsk",
   authDomain: "calendarioroccasicura.firebaseapp.com",
@@ -190,32 +185,39 @@ firebase.initializeApp({
   messagingSenderId: "38731898044",
   appId: "1:38731898044:web:e89bcfae7c64239fec44b9"
 });
+
 const db = firebase.database();
 
-/* USER */
-const nomeReale = localStorage.getItem("utente") || "Ospite";
-const user =
-  nomeReale[0] + Math.floor(Math.random()*900+100) + nomeReale.slice(1);
+/* =========================================================
+   NOME MASCHERATO
+========================================================= */
+const nameReal = localStorage.getItem("utente") || "Ospite";
+const user = nameReal[0] + Math.floor(Math.random()*900+100) + nameReal.slice(1);
 
-/* CANVAS */
+/* =========================================================
+   CANVAS
+========================================================= */
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 
 function resizeCanvas() {
   const W = window.innerWidth;
   const H = window.innerHeight;
+
   if (W < 700) {
     canvas.width = W - 20;
     canvas.height = H * 0.70;
   } else {
     canvas.width = 900;
-    canvas.height = 550;
+    canvas.height = 540;
   }
 }
 resizeCanvas();
 window.addEventListener("resize", resizeCanvas);
 
-/* IMMAGINI */
+/* =========================================================
+   IMMAGINI
+========================================================= */
 const starImg = new Image();
 starImg.src = "../img/stella_cartoon.png";
 
@@ -225,34 +227,32 @@ iceImg.src = "../img/blocco_ghiaccio.png";
 const meteorImg = new Image();
 meteorImg.src = "../img/meteorite.png";
 
-/* STELLA */
+/* =========================================================
+   GAME OBJECTS
+========================================================= */
+
 let star = {
-  x: 100,
-  y: 100,
+  x: 150,
+  y: 150,
   size: 60,
-  vx: 2,
+  vx: 3,
   vy: 2,
   trail: []
 };
 
-/* BOMBE/ICE */
 let ices = [];
-
-/* METEORITE */
 let meteor = null;
-
-/* PARTICELLE */
 let particles = [];
 
-/* GAME VARS */
+/* HUD */
 let score = 0;
 let lives = 3;
 let timeLeft = 30;
 let playing = false;
 
-/* ================================
+/* =========================================================
    PARTICELLE
-================================ */
+========================================================= */
 function createParticles(x, y, color) {
   for (let i=0; i<10; i++) {
     particles.push({
@@ -265,33 +265,30 @@ function createParticles(x, y, color) {
   }
 }
 
-/* ================================
-   SPAWN METEORITE
-================================ */
-function spawnMeteor() {
-  meteor = {
-    x: canvas.width,
-    y: Math.random()*canvas.height*0.5,
-    vx: -6,
-    size: 50
-  };
-  setTimeout(() => {
-    if (meteor) {
-      /* deviare la stella */
-      star.vx = (Math.random()*5 - 2.5);
-      star.vy = (Math.random()*5 - 2.5);
-    }
-  }, 300);
+/* =========================================================
+   STELLA
+========================================================= */
+function updateStar() {
+  star.x += star.vx;
+  star.y += star.vy;
+
+  if (star.x < 0 || star.x+star.size > canvas.width) star.vx *= -1;
+  if (star.y < 0 || star.y+star.size > canvas.height) star.vy *= -1;
+
+  /* SCIA NEON */
+  star.trail.push({ x: star.x+30, y: star.y+30, alpha: 1 });
+  if (star.trail.length > 15) star.trail.shift();
 }
 
-/* ================================
-   SPAWN BOMBA GHIACCIO
-================================ */
+/* =========================================================
+   GHIACCIO
+========================================================= */
 function spawnIce() {
   ices.push({
-    x: Math.random()*(canvas.width-60),
-    y: Math.random()*(canvas.height-120)+60,
-    size: 50
+    x: Math.random()*(canvas.width - 70),
+    y: Math.random()*(canvas.height - 150),
+    size: 55,
+    hit: false
   });
 
   setTimeout(() => {
@@ -299,37 +296,76 @@ function spawnIce() {
   }, 2500);
 }
 
-/* ================================
-   UPDATE STELLA + SCIA
-================================ */
-function moveStar() {
-  star.x += star.vx;
-  star.y += star.vy;
-
-  if (star.x < 0 || star.x+star.size > canvas.width) star.vx *= -1;
-  if (star.y < 0 || star.y+star.size > canvas.height) star.vy *= -1;
-
-  star.trail.push({x: star.x, y: star.y, alpha: 1});
-  if (star.trail.length > 20) star.trail.shift();
+/* =========================================================
+   METEORITE
+========================================================= */
+function spawnMeteor() {
+  meteor = {
+    x: canvas.width,
+    y: Math.random() * (canvas.height * 0.5),
+    vx: -6,
+    size: 50
+  };
 }
 
-/* ================================
+function updateMeteor() {
+  if (!meteor) return;
+
+  meteor.x += meteor.vx;
+
+  /* collisione con stella = deviazione */
+  if (
+    meteor.x < star.x + star.size &&
+    meteor.x + meteor.size > star.x &&
+    meteor.y < star.y + star.size &&
+    meteor.y + meteor.size > star.y
+  ) {
+    star.vx = (Math.random()*6 - 3);
+    star.vy = (Math.random()*6 - 3);
+    createParticles(star.x, star.y, "#ffa726");
+  }
+
+  if (meteor.x < -70) meteor = null;
+}
+
+/* =========================================================
+   COLLISIONI
+========================================================= */
+function checkCollisions() {
+  /* ghiaccio */
+  ices.forEach(i => {
+    if (i.hit) return;
+
+    if (
+      star.x < i.x + i.size &&
+      star.x + star.size > i.x &&
+      star.y < i.y + i.size &&
+      star.y + star.size > i.y
+    ) {
+      i.hit = true;
+      lives--;
+      createParticles(i.x, i.y, "#b3e5fc");
+
+      if (lives <= 0) endGame();
+    }
+  });
+}
+
+/* =========================================================
    DRAW
-================================ */
+========================================================= */
 function draw() {
   ctx.clearRect(0,0,canvas.width,canvas.height);
 
   /* meteorite */
-  if (meteor) {
-    ctx.drawImage(meteorImg, meteor.x, meteor.y, meteor.size, meteor.size);
-  }
+  if (meteor) ctx.drawImage(meteorImg, meteor.x, meteor.y, meteor.size, meteor.size);
 
-  /* trail */
+  /* scia neon */
   star.trail.forEach(t => {
     ctx.globalAlpha = t.alpha;
-    ctx.fillStyle = "#fff59d";
+    ctx.fillStyle = "#fff67a";
     ctx.beginPath();
-    ctx.arc(t.x+30, t.y+30, 8, 0, Math.PI*2);
+    ctx.arc(t.x, t.y, 8, 0, Math.PI*2);
     ctx.fill();
     ctx.globalAlpha = 1;
   });
@@ -337,7 +373,7 @@ function draw() {
   /* stella */
   ctx.drawImage(starImg, star.x, star.y, star.size, star.size);
 
-  /* ghiacci */
+  /* ghiaccio */
   ices.forEach(i => {
     ctx.drawImage(iceImg, i.x, i.y, i.size, i.size);
   });
@@ -355,21 +391,15 @@ function draw() {
     `⭐ ${score} | ❤️ ${lives} | ⏳ ${timeLeft}s`;
 }
 
-/* ================================
+/* =========================================================
    UPDATE
-================================ */
+========================================================= */
 function update() {
+  updateStar();
+  updateMeteor();
+  checkCollisions();
 
-  /* stella */
-  moveStar();
-
-  /* meteor */
-  if (meteor) {
-    meteor.x += meteor.vx;
-    if (meteor.x < -60) meteor = null;
-  }
-
-  /* particelle */
+  /* particelle update */
   particles.forEach(p => {
     p.x += p.vx;
     p.y += p.vy;
@@ -377,87 +407,84 @@ function update() {
   });
   particles = particles.filter(p => p.alpha > 0);
 
-  /* collisioni */
-  ices.forEach(i => {
-    if (
-      star.x < i.x+i.size &&
-      star.x+star.size > i.x &&
-      star.y < i.y+i.size &&
-      star.y+star.size > i.y
-    ) {
-      lives--;
-      createParticles(i.x, i.y, "#b3e5fc");
-      ices = ices.filter(x => x !== i);
-      if (lives <= 0) endGame();
-    }
-  });
-
   draw();
 
   if (playing) requestAnimationFrame(update);
 }
 
-/* ================================
-   TOUCH/CLOCK
-================================ */
-canvas.addEventListener("click", () => {
-  score += 5;
-  createParticles(star.x, star.y, "#fff176");
+/* =========================================================
+   CLICK STELLA – MOUSE + TOUCH
+========================================================= */
+canvas.addEventListener("click", e => {
+  const rect = canvas.getBoundingClientRect();
+  const mx = e.clientX - rect.left;
+  const my = e.clientY - rect.top;
+
+  if (
+    mx >= star.x &&
+    mx <= star.x + star.size &&
+    my >= star.y &&
+    my <= star.y + star.size
+  ) {
+    score += 5;
+    createParticles(star.x, star.y, "#fff176");
+  }
 });
 
-/* ================================
+/* =========================================================
    TIMER
-================================ */
+========================================================= */
 function startTimer() {
   const t = setInterval(() => {
+    if (!playing) return clearInterval(t);
+
     timeLeft--;
-    if (timeLeft <= 0 || !playing) {
+    if (timeLeft <= 0) {
       clearInterval(t);
       endGame();
     }
   },1000);
 }
 
-/* ================================
-   START GAME
-================================ */
+/* =========================================================
+   START
+========================================================= */
 document.getElementById("btn-start").onclick = () => {
   document.getElementById("start-screen").style.display = "none";
+
   canvas.style.display = "block";
   document.getElementById("info").style.display = "block";
 
   playing = true;
+
   startTimer();
+  update();
 
   setInterval(spawnIce, 1200);
-  setInterval(() => { if (Math.random()<0.4) spawnMeteor(); }, 3000);
-
-  update();
+  setInterval(() => { if (Math.random()<0.4) spawnMeteor(); }, 2500);
 };
 
-/* ================================
+/* =========================================================
    CLASSIFICA
-================================ */
-function salvaOnline() {
-  const ref = db.ref("punteggi/giorno5").push();
-  ref.set({
+========================================================= */
+function saveScore() {
+  db.ref("punteggi/giorno5").push({
     nome: user,
     punti: score,
     timestamp: Date.now()
-  })
-  .then(() => caricaClassifica());
+  }).then(loadTop10);
 }
 
-function caricaClassifica() {
+function loadTop10() {
   const table = document.getElementById("score-table");
   table.innerHTML = "<tr><th>Nome</th><th>Punti</th></tr>";
 
   db.ref("punteggi/giorno5")
     .orderByChild("punti")
     .limitToLast(10)
-    .once("value", snap => {
+    .once("value", s => {
       let arr = [];
-      snap.forEach(c => arr.push(c.val()));
+      s.forEach(c => arr.push(c.val()));
       arr.sort((a,b)=> b.punti - a.punti);
 
       arr.forEach(r => {
@@ -468,25 +495,27 @@ function caricaClassifica() {
     });
 }
 
-/* ================================
-   FINE GIOCO
-================================ */
+/* =========================================================
+   END
+========================================================= */
 function endGame() {
   playing = false;
   canvas.style.display = "none";
   document.getElementById("info").style.display = "none";
+
   document.getElementById("fine").style.display = "flex";
 
   document.getElementById("fine-msg").innerHTML =
     `⭐ Hai totalizzato <b>${score}</b> punti!`;
 
-  salvaOnline();
+  saveScore();
 }
 
+/* CLASSIFICA DIRETTA */
 document.getElementById("btn-top10").onclick = () => {
   document.getElementById("start-screen").style.display = "none";
   document.getElementById("fine").style.display = "flex";
-  caricaClassifica();
+  loadTop10();
 };
 
 document.getElementById("retry-btn").onclick = () => location.reload();
@@ -494,4 +523,3 @@ document.getElementById("retry-btn").onclick = () => location.reload();
 
 </body>
 </html>
-
