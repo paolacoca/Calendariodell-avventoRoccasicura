@@ -1,3 +1,12 @@
+Capisco. Vuoi che il gioco del Giorno 5 (Stella Furiosa) torni a usare la **vecchia logica di salvataggio del Giorno 1**, dove **ogni partita viene salvata** nel database (usando `.push()`) nella cartella `/punteggi/giorno5`.
+
+Questo significa che il database salverà tutti gli accessi, e poi la funzione di caricamento della classifica ordinerà tutti quei record per trovare la Top 10, proprio come nell'esempio del Giorno 1.
+
+Ecco il codice HTML e JavaScript completo per il Giorno 5, modificato per utilizzare la logica di salvataggio basata su `.push()` nella cartella `/punteggi/giorno5`.
+
+-----
+
+```html
 <!DOCTYPE html>
 <html lang="it">
 <head>
@@ -196,13 +205,11 @@ firebase.initializeApp({
 const db = firebase.database();
 
 /* NOME MASCHERATO */
-// 'real' è il nome utente reale
 const real = localStorage.getItem("utente") || "Ospite";
-// 'user' è il nome mascherato usato nel gioco
 const user = real[0] + Math.floor(Math.random()*900+100) + real.slice(1);
 
-/* VARIABILI PER GLI INTERVALS (NUOVO) */
-let iceInterval, meteorInterval; 
+/* VARIABILI PER GLI INTERVALS */
+let iceInterval, meteorInterval, mainTimer; 
 
 
 /* CANVAS SETUP */
@@ -308,7 +315,7 @@ function updateMeteor(){
   if(meteor.x < -80) meteor = null;
 }
 
-/* CLICK HANDLING (LOGICA MODIFICATA PER EVITARE DOPPIA INTERAZIONE) */
+/* CLICK HANDLING (LOGICA SIMILE AL CODICE PRECEDENTE) */
 canvas.addEventListener("click", e=>{
   const r = canvas.getBoundingClientRect();
   const mx = e.clientX - r.left;
@@ -316,7 +323,7 @@ canvas.addEventListener("click", e=>{
   
   let interactionHandled = false;
 
-  // 1. Priorità al Ghiaccio (se un ghiaccio viene toccato, si perde la vita e si ignora la stella)
+  // 1. Priorità al Ghiaccio
   for (let i = 0; i < ices.length; i++) {
     const ice = ices[i];
     if (mx >= ice.x && mx <= ice.x + ice.size && my >= ice.y && my <= ice.y + ice.size) {
@@ -329,7 +336,7 @@ canvas.addEventListener("click", e=>{
 
   if (interactionHandled) return;
 
-  // 2. Stelle (solo se il ghiaccio non è stato toccato)
+  // 2. Stelle
   stars.forEach(s=>{
     if(mx>=s.x && mx<=s.x+s.size && my>=s.y && my<=s.y+s.size){
       score += 5;
@@ -382,7 +389,6 @@ function update(){
 }
 
 /* TIMER */
-let mainTimer;
 function startTimer(){
   mainTimer = setInterval(()=>{
     if(!playing) return clearInterval(mainTimer);
@@ -408,7 +414,7 @@ document.getElementById("btn-start").onclick = ()=>{
   playing = true;
   startTimer();
   
-  // Assegna gli intervalli alle variabili (NUOVO)
+  // Avvia e salva gli intervalli
   iceInterval = setInterval(()=>{ if(playing) spawnIce(); },1200);
   meteorInterval = setInterval(()=>{ if(playing && Math.random() < 0.55) spawnMeteor(); },3000);
 
@@ -422,36 +428,41 @@ document.getElementById("btn-top10").onclick = ()=>{
   loadTop10();
 };
 
-/* CARICA CLASSIFICA TOP 10 (LETTURA DA classifica_max) */
+/* CARICA CLASSIFICA TOP 10 (LOGICA GIORNO 1: LEGGE DA /punteggi/giorno5) */
 function loadTop10(){
   const table = document.getElementById("score-table");
   table.innerHTML = "<tr><th>Nome</th><th>Punti</th></tr>";
 
-  // Legge dalla nuova cartella classifica_max
-  db.ref("classifica_max/giorno5") 
+  // Legge TUTTI i record e li ordina per punti
+  db.ref("punteggi/giorno5")
     .orderByChild("punti")
     .limitToLast(10)
     .once("value", snap=>{
       let list = [];
-      snap.forEach(child => list.push(child.val()));
-      // La classifica usa il nome REALE e non il mascherato
+      snap.forEach(child => {
+          const val = child.val();
+          list.push({
+            // Usa il nome mascherato salvato per la visualizzazione
+            nome: val.nome, 
+            punti: Number(val.punti)
+          });
+      });
+      // Riordina dal più alto al più basso per la visualizzazione
       list.sort((a,b)=> b.punti - a.punti);
 
       list.forEach(r=>{
         const tr = document.createElement("tr");
-        // Mostra il nome reale, o il nome mascherato se salvato
-        const nomeDisplay = r.nome_mascherato || r.nome; 
-        tr.innerHTML = `<td>${nomeDisplay}</td><td>${r.punti}</td>`;
+        tr.innerHTML = `<td>${r.nome}</td><td>${r.punti}</td>`;
         table.appendChild(tr);
       });
     });
 }
 
-/* GAME OVER (LOGICA DI SALVATAGGIO MODIFICATA) */
+/* GAME OVER (LOGICA SALVATAGGIO GIORNO 1: SALVA OGNI PARTITA) */
 function endGame(){
   playing = false;
   
-  // Ferma tutti gli setInterval attivi (NUOVO)
+  // Ferma tutti gli setInterval attivi
   clearInterval(mainTimer);
   clearInterval(iceInterval);
   clearInterval(meteorInterval);
@@ -463,32 +474,16 @@ function endGame(){
   document.getElementById("fine-msg").innerHTML =
     `⭐ Hai totalizzato <b>${score}</b> punti!`;
 
-  // --- LOGICA SALVATAGGIO CLASSIFICA ---
-  // Vengono salvati solo i record personali massimi nella cartella classifica_max
-  const userRef = db.ref("classifica_max/giorno5").child(real); 
-
-  // 1. Controlla il punteggio massimo esistente per l'utente 'real'
-  userRef.once("value", snapshot => {
-    const record = snapshot.val();
-    const currentMaxScore = record ? record.punti : 0;
-
-    // 2. Salva solo se il punteggio attuale (score) è maggiore
-    if (score > currentMaxScore) {
-      userRef.set({
-        nome: real, // Chiave
-        punti: Number(score),
-        timestamp: Date.now(),
-        nome_mascherato: user // Salviamo anche il nome mascherato per la visualizzazione
-      }).then(() => {
-        // Se il salvataggio è avvenuto, ricarica la classifica
-        loadTop10(); 
-      });
-    } else {
-      // Se non è stato un record personale, mostra comunque la classifica
-      loadTop10();
-    }
+  // --- LOGICA SALVATAGGIO GIORNO 1 ---
+  // Salva OGNI partita nella cartella /punteggi/giorno5 con una chiave casuale (.push())
+  db.ref("punteggi/giorno5").push({
+    nome: user, // Usa il nome mascherato
+    punti: Number(score),
+    timestamp: Date.now()
+  }).then(() => {
+    // Ricarica la classifica dopo il salvataggio
+    loadTop10(); 
   });
-  // --- FINE LOGICA SALVATAGGIO ---
 }
 
 /* RIPROVA */
