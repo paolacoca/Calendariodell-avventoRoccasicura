@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+
+<title>🎄 Giorno 6 – Magia in Rosso</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
+
+<script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/11.0.1/firebase-storage-compat.js"></script>
+
+<style>
+body {
+  margin: 0;
+  padding: 0;
+  font-family: "Ubuntu", sans-serif;
+  background-color: #7b0412;
+  color: #ffd9a0;
+  text-align: center;
+}
+
+/* SCREENS */
+.screen { display: none; }
+.active { display: block; }
+
+/* BUTTON */
+.btn {
+  background: #fff3e0;
+  padding: 12px 28px;
+  border-radius: 30px;
+  font-weight: bold;
+  color: #7b0412;
+  border: none;
+  cursor: pointer;
+  margin-top: 20px;
+  font-size: 18px;
+}
+.btn:hover { background: #ffe2bf; }
+
+/* UPLOAD BOX */
+.upload-box {
+  background: rgba(255,255,255,0.15);
+  border: 2px solid #ffd9a0;
+  border-radius: 12px;
+  padding: 20px;
+  width: 80%;
+  max-width: 400px; /* Aggiunto max-width */
+  margin: 20px auto;
+}
+
+/* COLLAGE GRID */
+#collage {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 10px;
+  margin: 20px auto;
+  max-width: 900px; /* Limita la larghezza della galleria */
+}
+
+.photo-item {
+    position: relative;
+    overflow: hidden;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+}
+
+.photo-item img {
+  width: 100%;
+  height: 130px;
+  object-fit: cover;
+  border: 3px solid #ffd9a0;
+  border-radius: 8px;
+  transition: transform 0.3s;
+}
+
+.photo-item:hover img {
+    transform: scale(1.05);
+}
+
+.caption {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: rgba(123, 4, 18, 0.8); /* Rosso scuro */
+    color: #fff;
+    font-size: 12px;
+    padding: 4px 0;
+    font-weight: bold;
+    text-align: center;
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
+}
+</style>
+</head>
+
+<body>
+
+<div id="intro" class="screen active">
+  <h1 style="color:#ffd700; margin-top:40px;">🎄 6 dicembre – Adesso iniziamo!</h1>
+
+  <p style="width:85%; margin:0 auto; font-size:18px;">
+    Un tocco di rosso che brilla come il cuore del Natale.<br>
+    Indossa qualcosa di rosso, oppure fotografa un oggetto rosso… e carica la tua foto! 📸🔴
+  </p>
+
+  <p style="margin-top:20px; font-size:22px;">🔴🔴🔴🔴🔴🔴🔴🔴</p>
+
+  <div style="margin-top:30px;">
+    <input id="username" placeholder="Inserisci il tuo nome"
+      style="padding:10px; border-radius:8px; width:70%; border:none; font-size:18px;">
+  </div>
+
+  <button class="btn" onclick="goToUpload()">CONTINUA</button>
+</div>
+
+
+
+<div id="upload" class="screen">
+  <h1 style="color:#ffd700; margin-top:30px;">Carica una foto!</h1>
+  <p id="welcome-message" style="font-size:1.1em; margin-top: -10px;"></p> <div class="upload-box">
+    <p>Select the format</p>
+    <p><b>Select image (Maximum: 10 MB)</b></p>
+
+    <input type="file" id="fileInput" accept="image/*"
+      style="margin-top:10px; font-size:16px;">
+  </div>
+
+  <div id="uploadStatus" style="margin-top:20px; font-size:18px;"></div>
+
+  <button class="btn" onclick="uploadPhoto()">CARICA</button>
+  <button class="btn" style="background:#ffd9a0;" onclick="showCollage()">VAI ALLA GALLERIA</button>
+</div>
+
+
+
+<div id="collageScreen" class="screen">
+  <h1 style="color:#ffd700; margin-top:20px;">✨ Galleria del 6 dicembre ✨</h1>
+  <p style="margin-top:-10px;">La magia cresce con ogni foto caricata! 📸🔴</p>
+
+  <div id="collage"></div>
+
+  <button class="btn" onclick="goToUploadFromCollage()">CARICA UN'ALTRA FOTO</button>
+</div>
+
+
+
+<script>
+/* ============================================================
+    FIREBASE INITIALIZATION
+============================================================ */
+const firebaseConfig = {
+  apiKey: "AIzaSyBrI1yThI6zmnYwKE4OHbS8vhrUPrMsnsk",
+  authDomain: "calendarioroccasicura.firebaseapp.com",
+  databaseURL: "https://calendarioroccasicura-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "calendarioroccasicura",
+  storageBucket: "calendarioroccasicura.appspot.com",
+  messagingSenderId: "38731898044",
+  appId: "1:38731898044:web:e89bcfae7c64239fec44b9"
+};
+
+firebase.initializeApp(firebaseConfig);
+
+const db = firebase.database();
+const storage = firebase.storage();
+
+let userName = "";
+const MAX_FILE_SIZE_MB = 10; // 10 Megabyte
+
+// Carica il nome utente se già salvato in localStorage
+document.addEventListener('DOMContentLoaded', () => {
+    const savedUser = localStorage.getItem("utente");
+    if (savedUser) {
+        document.getElementById("username").value = savedUser;
+    }
+});
+
+
+/* ============================================================
+    NAVIGATION
+============================================================ */
+function goToUpload() {
+  userName = document.getElementById("username").value.trim();
+
+  if (userName.length < 1) {
+    alert("Inserisci il tuo nome prima di procedere.");
+    return;
+  }
+  
+  // Salva il nome utente per sessioni future
+  localStorage.setItem("utente", userName); 
+
+  // Aggiorna il messaggio di benvenuto nella schermata di upload
+  document.getElementById("welcome-message").textContent = `Ciao, ${userName}! Pronti per caricare.`;
+  
+  // Navigazione
+  document.getElementById("intro").classList.remove("active");
+  document.getElementById("upload").classList.add("active");
+}
+
+function goToUploadFromCollage() {
+    document.getElementById("collageScreen").classList.remove("active");
+    document.getElementById("upload").classList.add("active");
+}
+
+function showCollage() {
+  document.getElementById("upload").classList.remove("active");
+  document.getElementById("collageScreen").classList.add("active");
+  loadCollage();
+}
+
+
+/* ============================================================
+    UPLOAD PHOTO TO FIREBASE STORAGE
+============================================================ */
+function uploadPhoto() {
+  const fileInput = document.getElementById("fileInput");
+  const file = fileInput.files[0];
+
+  if (!file) {
+    alert("Seleziona una foto!");
+    return;
+  }
+  
+  // 🔒 Validazione dimensione file (Max 10MB)
+  if (file.size > MAX_FILE_SIZE_MB * 1024 * 1024) {
+      alert(`Il file è troppo grande. Dimensione massima consentita: ${MAX_FILE_SIZE_MB} MB.`);
+      fileInput.value = ''; // Resetta l'input file
+      return;
+  }
+
+  document.getElementById("uploadStatus").innerHTML = "Caricamento in corso…";
+
+  // Genera una chiave univoca sia per il database che per lo storage
+  const photoId = db.ref().push().key; 
+  const storageRef = storage.ref("foto/giorno6/" + photoId + ".jpg");
+  const uploadTask = storageRef.put(file);
+
+  uploadTask.on(
+    "state_changed",
+    (snapshot) => {
+      let p = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+      document.getElementById("uploadStatus").innerHTML = "Caricamento: " + Math.round(p) + "%";
+    },
+
+    (error) => {
+      alert("Errore nel caricamento!");
+      console.log(error);
+      document.getElementById("uploadStatus").innerHTML = "Caricamento fallito.";
+    },
+
+    () => {
+      uploadTask.snapshot.ref.getDownloadURL().then((url) => {
+        // Salva i metadati nel Realtime Database
+        db.ref("gallerie/giorno6/" + photoId).set({
+          nome: userName,
+          url: url,
+          timestamp: Date.now() // Utile per ordinare cronologicamente
+        });
+
+        document.getElementById("uploadStatus").innerHTML =
+          "✨ Foto caricata! Apri la galleria!";
+          fileInput.value = ''; // Pulisce l'input file dopo il successo
+      });
+    }
+  );
+}
+
+
+/* ============================================================
+    LOAD COLLAGE
+============================================================ */
+function loadCollage() {
+  const collageBox = document.getElementById("collage");
+  collageBox.innerHTML = "Caricamento immagini...";
+
+  // Listener Real-Time (.on) per aggiornare la galleria quando vengono aggiunte nuove foto
+  db.ref("gallerie/giorno6").orderByChild("timestamp").on("value", (snap) => {
+    collageBox.innerHTML = "";
+    let list = [];
+    
+    // Raccogli i dati e li inserisci in un array
+    snap.forEach((child) => {
+      list.push(child.val());
+    });
+    
+    // Ordina in ordine DECRESCENTE (foto più recenti in alto)
+    list.reverse();
+
+    if (list.length === 0) {
+        collageBox.innerHTML = "<p>Nessuna foto caricata. Sii il primo! 📸</p>";
+        return;
+    }
+
+    list.forEach((data) => {
+      const photoItem = document.createElement("div");
+      photoItem.classList.add("photo-item");
+
+      const img = document.createElement("img");
+      img.src = data.url;
+      img.alt = `Foto caricata da ${data.nome}`;
+
+      const caption = document.createElement("div");
+      caption.classList.add("caption");
+      caption.textContent = data.nome;
+
+      photoItem.appendChild(img);
+      photoItem.appendChild(caption);
+      collageBox.appendChild(photoItem);
+    });
+  });
+}
+
+</script>
+
+<script src="https://cdn.counter.dev/script.js"
+        data-id="9d666b79-dc20-433b-8015-ac699700813e"
+        data-utcoffset="1"></script>
+
+</body>
+</html>
